@@ -428,17 +428,16 @@ function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"
 window.editVessel=id=>openVessel(vesselBy(id));
 window.removeOrArchiveVessel=async id=>{
  let vessel=vesselBy(id);if(!vessel)return;
- let hasLogs=L.some(l=>l.vessel_id===id),hasReservations=R.some(r=>r.vessel_id===id);
- if(!hasLogs&&!hasReservations){
-  if(!confirm("Esta embarcação não possui histórico. Excluir definitivamente "+vessel.name+"?"))return;
-  let {error}=await supabase.from('vessels').delete().eq('id',id);
-  if(error)return alert("Não foi possível excluir: "+error.message);
-  await audit("Embarcação excluída definitivamente","vessel",id,{name:vesselLabel(vessel)});
+ if(!confirm("Excluir "+vesselLabel(vessel)+"? Se houver qualquer histórico, a embarcação será arquivada em vez de apagada."))return;
+ let {data,error}=await supabase.rpc('remove_or_archive_vessel',{p_vessel_id:id});
+ if(error)return alert("Não foi possível excluir/arquivar: "+error.message);
+ let result=Array.isArray(data)?data[0]:data;
+ if(result?.action==="deleted"){
+  alert(vesselLabel(vessel)+" foi excluída definitivamente, pois não possuía histórico.")
+ }else if(result?.action==="archived"){
+  alert(vesselLabel(vessel)+" possui histórico e foi arquivada para preservar os registros.")
  }else{
-  if(!confirm(vesselLabel(vessel)+" possui histórico. Ela será arquivada para preservar os registros. Continuar?"))return;
-  let {error}=await supabase.from('vessels').update({archived:true,archived_at:new Date().toISOString(),updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
-  if(error)return alert("Não foi possível arquivar: "+error.message);
-  await audit("Embarcação arquivada","vessel",id,{name:vesselLabel(vessel)});
+  alert("Operação concluída.")
  }
  await loadAll()
 };
