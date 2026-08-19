@@ -33,11 +33,34 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 .reservation{border:1px solid var(--border);border-radius:10px;padding:9px;margin-bottom:7px}.reservation strong{display:block}.auditLine{font-size:.72rem;padding:7px 0;border-bottom:1px solid var(--border)}.auditLine:last-child{border-bottom:0}
 @media(max-width:720px){.grid3{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.actions button{flex:1}.row{align-items:flex-start}.metric strong{font-size:1.05rem}}
 @media(max-width:420px){main{padding:8px}.grid{grid-template-columns:1fr 1fr;gap:6px}.metric{padding:9px}.metric span{font-size:.62rem}.bottom button{font-size:.61rem}.vessel summary{padding:9px}}
+
+/* V5 institucional */
+.brandTitle{display:flex;align-items:center;gap:9px}.brandTitle img{width:34px;height:34px;border-radius:8px}
+.executiveGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.execCard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px}
+.execCard span{display:block;color:var(--muted);font-size:.65rem}.execCard strong{display:block;font-size:1.15rem;margin-top:4px}
+.periodBar{display:flex;gap:6px;flex-wrap:wrap}.periodBar button.active{background:var(--primary);color:#fff}
+.kpiList{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpi{border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--soft)}
+.kpi span{display:block;font-size:.65rem;color:var(--muted)}.kpi strong{display:block;font-size:1rem;margin-top:3px}
+.vesselProfile{display:grid;gap:8px}
+.profileHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.profileStats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.profileStat{border:1px solid var(--border);border-radius:9px;padding:8px;background:var(--soft)}
+.profileStat span{display:block;font-size:.62rem;color:var(--muted)}.profileStat strong{display:block;margin-top:2px}
+.pendingDamage{border-left:4px solid #dc2626}.resolvedDamage{border-left:4px solid #16a34a}
+.checklistGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.checkItem{display:flex;align-items:center;gap:7px;border:1px solid var(--border);padding:8px;border-radius:9px;background:var(--soft)}
+.checkItem input{width:auto;margin:0}
+.reportTable{width:100%;border-collapse:collapse;font-size:.76rem}.reportTable th,.reportTable td{padding:7px;border-bottom:1px solid var(--border);text-align:left}
+.reportTable th{color:var(--muted);font-size:.68rem}
+.chip{display:inline-flex;border-radius:999px;padding:3px 7px;font-size:.62rem;font-weight:800;background:var(--soft)}
+@media(max-width:760px){.executiveGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.kpiList{grid-template-columns:repeat(2,minmax(0,1fr))}.profileStats{grid-template-columns:repeat(2,minmax(0,1fr))}.checklistGrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
- <div><h1>Controle de Embarcações</h1><small>Frota Náutica • CBMRN</small></div>
+ <div class="brandTitle"><img src="icon-192.png" alt=""><div><h1>Náutica CBMRN</h1><small>Gestão da Frota Náutica</small></div></div>
  <div class="actions">
   <span id="syncState" class="sync"><span id="onlineDot" class="onlineDot"></span><span id="syncText">Desconectado</span></span>
   <button id="installBtn" class="secondary">Instalar</button>
@@ -63,17 +86,30 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 <div id="appShell" class="hidden">
 <section id="dashboard" class="panel active">
  <div class="card">
-  <div class="sectionTitle"><div><h2>Hoje</h2><div id="todayLabel" class="muted"></div></div><button id="newUsageTop" class="primary">+ Registrar uso</button></div>
-  <div class="grid">
-   <div class="metric"><span>Disponíveis</span><strong id="mAvailable">0</strong></div>
-   <div class="metric"><span>Em uso</span><strong id="mInUse">0</strong></div>
-   <div class="metric"><span>Manutenção / indisponíveis</span><strong id="mUnavailable">0</strong></div>
-   <div class="metric"><span>Combustível lançado hoje</span><strong id="mFuel">0 L</strong></div>
+  <div class="sectionTitle"><div><h2>Painel Operacional</h2><div id="todayLabel" class="muted"></div></div><button id="newUsageTop" class="primary">+ Registrar uso</button></div>
+  <div class="executiveGrid">
+   <div class="execCard"><span>Total da frota</span><strong id="mFleet">0</strong></div>
+   <div class="execCard"><span>Disponíveis</span><strong id="mAvailable">0</strong></div>
+   <div class="execCard"><span>Em uso</span><strong id="mInUse">0</strong></div>
+   <div class="execCard"><span>Manutenção / indisponíveis</span><strong id="mUnavailable">0</strong></div>
+   <div class="execCard"><span>Reservas de hoje</span><strong id="mReservations">0</strong></div>
+   <div class="execCard"><span>Avarias pendentes</span><strong id="mPendingDamage">0</strong></div>
+   <div class="execCard"><span>Combustível hoje</span><strong id="mFuel">0 L</strong></div>
+   <div class="execCard"><span>Revisões próximas</span><strong id="mMaintenanceDue">0</strong></div>
   </div>
+ </div>
+ <div class="card">
+  <div class="sectionTitle"><div><h3>Indicadores</h3><div class="muted">Visão gerencial por período.</div></div></div>
+  <div class="periodBar" id="periodBar">
+   <button class="secondary active" data-period="7">7 dias</button>
+   <button class="secondary" data-period="30">30 dias</button>
+   <button class="secondary" data-period="month">Mês atual</button>
+  </div>
+  <div id="kpiList" class="kpiList" style="margin-top:9px"></div>
  </div>
  <div class="card"><h3>Disponibilidade atual</h3><div id="todayVessels"></div></div>
  <div class="card"><h3>Reservas / programação</h3><div id="todayReservations"></div></div>
- <div class="card"><h3>Atividades de hoje</h3><div id="todayTimeline"></div></div>
+ <div class="card"><h3>Avarias pendentes</h3><div id="dashboardDamages"></div></div>
 </section>
 
 <section id="vessels" class="panel">
@@ -92,9 +128,30 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
  <div class="card"><div class="grid"><label>Tipo<select id="logFilter"><option value="">Todos</option><option value="usage">Uso / saída</option><option value="fuel">Combustível</option><option value="cleaning">Limpeza</option><option value="maintenance">Manutenção</option><option value="damage">Avaria</option><option value="inspection">Inspeção</option></select></label><label>Embarcação<select id="logVesselFilter"></select></label></div></div>
  <div id="logList"></div>
 </section>
+<section id="checklists" class="panel">
+ <div class="card sectionTitle"><div><h3>Checklists</h3><div class="muted">Inspeções pré e pós-uso.</div></div><button id="newChecklist" class="primary">+ Checklist</button></div>
+ <div class="card"><div class="grid"><label>Embarcação<select id="checklistVesselFilter"></select></label><label>Tipo<select id="checklistTypeFilter"><option value="">Todos</option><option value="pre">Pré-uso</option><option value="post">Pós-uso</option></select></label></div></div>
+ <div id="checklistList"></div>
+</section>
+
+<section id="damages" class="panel">
+ <div class="card sectionTitle"><div><h3>Avarias</h3><div class="muted">Pendências identificadas e resolução.</div></div><button id="newDamage" class="primary">+ Avaria</button></div>
+ <div class="card"><div class="grid"><label>Status<select id="damageFilter"><option value="">Todas</option><option value="open">Pendentes</option><option value="resolved">Resolvidas</option></select></label><label>Embarcação<select id="damageVesselFilter"></select></label></div></div>
+ <div id="damageList"></div>
+</section>
+
+<section id="reports" class="panel">
+ <div class="card"><div class="sectionTitle"><div><h3>Relatórios</h3><div class="muted">Resumo operacional da frota.</div></div><button id="exportCsvBtn" class="secondary">Exportar CSV</button></div>
+ <div class="grid"><label>De<input id="reportFrom" type="date"></label><label>Até<input id="reportTo" type="date"></label></div>
+ </div>
+ <div class="card"><div id="reportSummary"></div></div>
+ <div class="card"><div style="overflow:auto"><table class="reportTable"><thead><tr><th>Embarcação</th><th>Usos</th><th>Litros</th><th>Horas</th><th>Avarias</th><th>Manutenções</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
+</section>
+
 
 <section id="more" class="panel">
  <div class="card"><h3>Usuário</h3><div id="userInfo" class="muted"></div><div class="actions" style="margin-top:8px"><button id="logoutBtn" class="secondary">Sair</button></div></div>
+ <div class="card"><h3>Relatórios</h3><div class="actions"><button type="button" class="primary" onclick="document.querySelector('[data-nav=more]').classList.remove('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('reports').classList.add('active')">Abrir relatórios</button></div></div>
  <div class="card"><h3>Sincronização</h3><p class="muted">Os dados são compartilhados pela nuvem. Alterações feitas por outra guarnição aparecem automaticamente.</p><div class="actions"><button id="forceRefresh" class="secondary">Atualizar agora</button></div></div>
  <div class="card"><h3>Embarcações arquivadas</h3><p class="muted">Embarcações com histórico não são apagadas. Elas ficam arquivadas e podem ser restauradas.</p><div id="archivedVessels"></div></div>
  <div class="card"><div class="sectionTitle"><div><h3>Histórico de alterações</h3><div class="muted">Registro das alterações realizadas no sistema.</div></div><button id="clearAuditBtn" class="danger">Limpar histórico</button></div><div id="auditList"></div></div>
@@ -102,11 +159,12 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 </div>
 </main>
 
-<nav id="bottomNav" class="bottom hidden">
- <button class="active" data-nav="dashboard"><span>⌂</span>Hoje</button>
+<nav id="bottomNav" class="bottom hidden" style="grid-template-columns:repeat(6,1fr)">
+ <button class="active" data-nav="dashboard"><span>⌂</span>Painel</button>
  <button data-nav="vessels"><span>🚤</span>Frota</button>
  <button data-nav="calendar"><span>📅</span>Agenda</button>
- <button data-nav="logs"><span>📝</span>Registros</button>
+ <button data-nav="checklists"><span>✓</span>Check</button>
+ <button data-nav="damages"><span>⚠️</span>Avarias</button>
  <button data-nav="more"><span>⋯</span>Mais</button>
 </nav>
 
@@ -163,6 +221,34 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
  <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('reservationDialog')">Cancelar</button><button class="primary">Salvar reserva</button></div>
 </form></dialog>
 
+
+<dialog id="checklistDialog"><form id="checklistForm">
+ <div class="dhead"><div><h3>Novo checklist</h3><div class="muted">Inspeção operacional da embarcação.</div></div><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">X</button></div>
+ <div class="dbody">
+  <div class="grid"><label>Embarcação<select id="checklistVessel" required></select></label><label>Tipo<select id="checklistType"><option value="pre">Pré-uso</option><option value="post">Pós-uso</option></select></label><label>Responsável / guarnição<input id="checklistResponsible"></label><label>Data e hora<input id="checklistDate" type="datetime-local" required></label></div>
+  <div class="checklistGrid" style="margin-top:10px">
+   <label class="checkItem"><input id="ckHull" type="checkbox"> Casco / estrutura</label>
+   <label class="checkItem"><input id="ckEngine" type="checkbox"> Motor / propulsão</label>
+   <label class="checkItem"><input id="ckFuel" type="checkbox"> Combustível suficiente</label>
+   <label class="checkItem"><input id="ckSafety" type="checkbox"> Equipamentos de segurança</label>
+   <label class="checkItem"><input id="ckRadio" type="checkbox"> Comunicação</label>
+   <label class="checkItem"><input id="ckClean" type="checkbox"> Limpeza / organização</label>
+  </div>
+  <label style="margin-top:9px">Observações<textarea id="checklistNotes" rows="3"></textarea></label>
+ </div>
+ <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">Cancelar</button><button class="primary">Salvar checklist</button></div>
+</form></dialog>
+
+<dialog id="damageDialog"><form id="damageForm">
+ <div class="dhead"><div><h3>Registrar avaria</h3><div class="muted">Pendência operacional da embarcação.</div></div><button type="button" class="secondary" onclick="closeDialog('damageDialog')">X</button></div>
+ <div class="dbody"><div class="grid">
+  <label>Embarcação<select id="damageVessel" required></select></label>
+  <label>Data<input id="damageDate" type="datetime-local" required></label>
+  <label>Severidade<select id="damageSeverity"><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label>
+  <label>Responsável<input id="damageResponsible"></label>
+ </div><label style="margin-top:9px">Descrição<textarea id="damageDescription" rows="3" required></textarea></label></div>
+ <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('damageDialog')">Cancelar</button><button class="primary">Salvar avaria</button></div>
+</form></dialog>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.js';
@@ -180,7 +266,7 @@ if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY||SUPABASE_URL.includes("COLE_")){
  throw new Error("Supabase não configurado");
 }
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-let user=null,profile=null,V=[],L=[],R=[],A=[],reloadTimer=null,realtimeChannel=null;
+let user=null,profile=null,V=[],L=[],R=[],A=[],C=[],D=[],reloadTimer=null,realtimeChannel=null,currentPeriod="7";
 
 window.closeDialog=id=>$(id).close();
 
@@ -197,14 +283,16 @@ async function loadProfile(){
 async function loadAll(){
  if(!user)return;
  setSync(false,"Sincronizando…");
- const [v,l,r,a]=await Promise.all([
+ const [v,l,r,a,c,d]=await Promise.all([
   supabase.from('vessels').select('*').order('name'),
   supabase.from('vessel_logs').select('*').order('occurred_at',{ascending:false}).limit(1000),
   supabase.from('reservations').select('*').order('start_at',{ascending:true}).limit(1000),
-  supabase.from('audit_events').select('*').order('created_at',{ascending:false}).limit(100)
+  supabase.from('audit_events').select('*').order('created_at',{ascending:false}).limit(100),
+  supabase.from('checklists').select('*').order('occurred_at',{ascending:false}).limit(1000),
+  supabase.from('damages').select('*').order('reported_at',{ascending:false}).limit(1000)
  ]);
- for(const result of [v,l,r,a])if(result.error)throw result.error;
- V=v.data||[];L=l.data||[];R=r.data||[];A=a.data||[];
+ for(const result of [v,l,r,a,c,d])if(result.error)throw result.error;
+ V=v.data||[];L=l.data||[];R=r.data||[];A=a.data||[];C=c.data||[];D=d.data||[];
  render();setSync(true,"Atualizado");
 }
 function scheduleReload(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>loadAll().catch(e=>{console.error(e);setSync(false,"Erro de sincronização")}),250)}
@@ -215,6 +303,8 @@ function subscribeRealtime(){
   .on('postgres_changes',{event:'*',schema:'public',table:'vessel_logs'},scheduleReload)
   .on('postgres_changes',{event:'*',schema:'public',table:'reservations'},scheduleReload)
   .on('postgres_changes',{event:'*',schema:'public',table:'audit_events'},scheduleReload)
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklists'},scheduleReload)
+  .on('postgres_changes',{event:'*',schema:'public',table:'damages'},scheduleReload)
   .subscribe(status=>setSync(status==='SUBSCRIBED',status==='SUBSCRIBED'?'Tempo real ativo':'Conectando…'));
 }
 async function audit(action,entityType,entityId,details={}){
@@ -226,17 +316,38 @@ function activeVessels(){return V.filter(v=>!v.archived)}
 function archivedVessels(){return V.filter(v=>v.archived)}
 function vesselOptions(selected=""){return '<option value="">Selecione</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===selected?"selected":""}>${esc(v.name)}</option>`).join("")}
 
+function periodStart(){
+ let now=new Date();
+ if(currentPeriod==="month")return new Date(now.getFullYear(),now.getMonth(),1);
+ let days=Number(currentPeriod||7);return new Date(now.getTime()-(days-1)*86400000)
+}
 function renderDashboard(){
- let today=localKey(new Date()),todayLogs=L.filter(l=>localKey(l.occurred_at)===today),active=activeVessels(),available=active.filter(v=>v.status==="available").length,inuse=active.filter(v=>v.status==="inuse").length,unavailable=active.length-available-inuse,fuel=todayLogs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0);
+ let today=localKey(new Date()),active=activeVessels(),todayLogs=L.filter(l=>localKey(l.occurred_at)===today),todayRes=R.filter(r=>r.status==="scheduled"&&(localKey(r.start_at)===today||localKey(r.end_at)===today)),pending=D.filter(d=>d.status==="open"),due=active.filter(v=>v.next_maintenance&&new Date(v.next_maintenance+"T23:59:59")<=new Date(Date.now()+30*86400000));
+ let available=active.filter(v=>v.status==="available").length,inuse=active.filter(v=>v.status==="inuse").length,unavailable=active.length-available-inuse,fuel=todayLogs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0);
  $("todayLabel").textContent=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
- $("mAvailable").textContent=available;$("mInUse").textContent=inuse;$("mUnavailable").textContent=unavailable;$("mFuel").textContent=fuel.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L";
- $("todayVessels").innerHTML=activeVessels().length?activeVessels().map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
- let todayRes=R.filter(r=>r.status==="scheduled"&&(localKey(r.start_at)===today||localKey(r.end_at)===today));
+ $("mFleet").textContent=active.length;$("mAvailable").textContent=available;$("mInUse").textContent=inuse;$("mUnavailable").textContent=unavailable;$("mReservations").textContent=todayRes.length;$("mPendingDamage").textContent=pending.length;$("mFuel").textContent=fuel.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L";$("mMaintenanceDue").textContent=due.length;
+
+ let from=periodStart(),logs=L.filter(l=>new Date(l.occurred_at)>=from),damages=D.filter(d=>new Date(d.reported_at)>=from),checks=C.filter(c=>new Date(c.occurred_at)>=from);
+ let uses=logs.filter(l=>l.type==="usage").length,liters=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0),fuelValue=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_value||0),0),maintenance=logs.filter(l=>l.type==="maintenance").length;
+ $("kpiList").innerHTML=[
+  ["Utilizações",uses],["Combustível",liters.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L"],["Gasto combustível","R$ "+fuelValue.toLocaleString("pt-BR",{minimumFractionDigits:2})],["Avarias registradas",damages.length],["Manutenções",maintenance],["Checklists",checks.length]
+ ].map(([a,b])=>`<div class="kpi"><span>${a}</span><strong>${b}</strong></div>`).join("");
+
+ $("todayVessels").innerHTML=active.length?active.map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
  $("todayReservations").innerHTML=todayRes.length?todayRes.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="reservation"><strong>${esc(v?.name||"Embarcação")} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}${r.responsible?" • "+esc(r.responsible):""}</div></div>`}).join(""):'<div class="empty">Nenhuma reserva para hoje.</div>';
- $("todayTimeline").innerHTML=todayLogs.length?todayLogs.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="timeline"><div class="timelineItem"><strong>${new Date(l.occurred_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} • ${esc(typeLabel(l.type))}</strong><span>${esc(v?.name||"Embarcação")}${l.responsible?" • "+esc(l.responsible):""}</span>${l.notes?`<div class="muted">${esc(l.notes)}</div>`:""}</div></div>`}).join(""):'<div class="empty">Nenhuma atividade hoje.</div>';
+ $("dashboardDamages").innerHTML=pending.length?pending.slice(0,8).map(d=>{let v=vesselBy(d.vessel_id);return`<div class="row"><div><strong>${esc(v?.name||"Embarcação")}</strong><div class="muted">${esc(d.description)} • ${new Date(d.reported_at).toLocaleDateString("pt-BR")}</div></div><span class="chip">${esc(d.severity)}</span></div>`}).join(""):'<div class="empty">Nenhuma avaria pendente.</div>';
 }
 function renderVessels(){
- $("vesselList").innerHTML=activeVessels().length?activeVessels().map(v=>`<details class="vessel"><summary><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.prefix?"• "+esc(v.prefix):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></summary><div class="vesselBody"><div class="grid"><div><span class="muted">Combustível</span><strong>${Number(v.fuel||0).toLocaleString("pt-BR")} L</strong></div><div><span class="muted">Horímetro</span><strong>${Number(v.hours||0).toLocaleString("pt-BR")} h</strong></div><div><span class="muted">Base</span><strong>${esc(v.base||"—")}</strong></div><div><span class="muted">Próxima revisão</span><strong>${v.next_maintenance?new Date(v.next_maintenance+"T12:00").toLocaleDateString("pt-BR"):"—"}</strong></div></div>${v.notes?`<p class="muted" style="margin-top:8px">${esc(v.notes)}</p>`:""}<div class="actions" style="margin-top:9px"><button class="primary" onclick="openLog('${v.id}','usage')">Registrar uso</button><button class="secondary" onclick="openLog('${v.id}','fuel')">Combustível</button><button class="secondary" onclick="editVessel('${v.id}')">Editar</button><button class="danger" onclick="removeOrArchiveVessel('${v.id}')">Excluir</button></div></div></details>`).join(""):'<div class="card empty">Nenhuma embarcação cadastrada.</div>'
+ let active=activeVessels();
+ $("vesselList").innerHTML=active.length?active.map(v=>{
+  let logs=L.filter(l=>l.vessel_id===v.id),checks=C.filter(c=>c.vessel_id===v.id),damages=D.filter(d=>d.vessel_id===v.id),pending=damages.filter(d=>d.status==="open"),lastUse=logs.find(l=>l.type==="usage"),lastFuel=logs.find(l=>l.type==="fuel"),lastMaintenance=logs.find(l=>l.type==="maintenance");
+  return `<details class="vessel"><summary><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.prefix?"• "+esc(v.prefix):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></summary><div class="vesselBody"><div class="vesselProfile">
+   <div class="profileStats"><div class="profileStat"><span>Combustível</span><strong>${Number(v.fuel||0).toLocaleString("pt-BR")} L</strong></div><div class="profileStat"><span>Horímetro</span><strong>${Number(v.hours||0).toLocaleString("pt-BR")} h</strong></div><div class="profileStat"><span>Avarias pendentes</span><strong>${pending.length}</strong></div><div class="profileStat"><span>Próxima revisão</span><strong>${v.next_maintenance?new Date(v.next_maintenance+"T12:00").toLocaleDateString("pt-BR"):"—"}</strong></div></div>
+   <div class="grid"><div><span class="muted">Último uso</span><strong>${lastUse?new Date(lastUse.occurred_at).toLocaleString("pt-BR"):"—"}</strong></div><div><span class="muted">Último abastecimento</span><strong>${lastFuel?new Date(lastFuel.occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div><div><span class="muted">Última manutenção</span><strong>${lastMaintenance?new Date(lastMaintenance.occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div><div><span class="muted">Último checklist</span><strong>${checks[0]?new Date(checks[0].occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div></div>
+   ${v.notes?`<p class="muted">${esc(v.notes)}</p>`:""}
+   <div class="actions"><button class="primary" onclick="openLog('${v.id}','usage')">Registrar uso</button><button class="secondary" onclick="openLog('${v.id}','fuel')">Combustível</button><button class="secondary" onclick="openChecklist('${v.id}')">Checklist</button><button class="warning" onclick="openDamage('${v.id}')">Avaria</button><button class="secondary" onclick="editVessel('${v.id}')">Editar</button><button class="danger" onclick="removeOrArchiveVessel('${v.id}')">Excluir</button></div>
+  </div></div></details>`
+ }).join(""):'<div class="card empty">Nenhuma embarcação cadastrada.</div>'
 }
 function renderCalendar(){
  $("calendarVessel").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join("");
@@ -248,14 +359,61 @@ function renderLogs(){
  let type=$("logFilter").value,vid=$("logVesselFilter").value,rows=L.filter(l=>(!type||l.type===type)&&(!vid||l.vessel_id===vid));
  $("logList").innerHTML=rows.length?rows.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="card"><strong>${esc(typeLabel(l.type))}</strong><div class="muted">${new Date(l.occurred_at).toLocaleString("pt-BR")} • ${esc(v?.name||"Embarcação")}</div>${l.responsible?`<p><strong>Responsável:</strong> ${esc(l.responsible)}</p>`:""}${l.type==="fuel"?`<p><strong>Combustível:</strong> ${Number(l.fuel_liters||0).toLocaleString("pt-BR")} L${l.fuel_value?` • R$ ${Number(l.fuel_value).toLocaleString("pt-BR",{minimumFractionDigits:2})}`:""}</p>`:""}${l.notes?`<p class="muted">${esc(l.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum registro encontrado.</div>'
 }
+function renderChecklists(){
+ let current=$("checklistVesselFilter").value;$("checklistVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let vid=$("checklistVesselFilter").value,type=$("checklistTypeFilter").value,rows=C.filter(c=>(!vid||c.vessel_id===vid)&&(!type||c.type===type));
+ $("checklistList").innerHTML=rows.length?rows.map(c=>{let v=vesselBy(c.vessel_id),ok=Object.values(c.items||{}).filter(Boolean).length,total=Object.keys(c.items||{}).length;return`<div class="card"><div class="row"><div><strong>${c.type==="pre"?"Pré-uso":"Pós-uso"} • ${esc(v?.name||"Embarcação")}</strong><div class="muted">${new Date(c.occurred_at).toLocaleString("pt-BR")}${c.responsible?" • "+esc(c.responsible):""}</div></div><span class="chip">${ok}/${total}</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum checklist encontrado.</div>'
+}
+function renderDamages(){
+ let current=$("damageVesselFilter").value;$("damageVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let vid=$("damageVesselFilter").value,status=$("damageFilter").value,rows=D.filter(d=>(!vid||d.vessel_id===vid)&&(!status||d.status===status));
+ $("damageList").innerHTML=rows.length?rows.map(d=>{let v=vesselBy(d.vessel_id);return`<div class="card ${d.status==="open"?"pendingDamage":"resolvedDamage"}"><div class="row"><div><strong>${esc(v?.name||"Embarcação")} • ${esc(d.severity)}</strong><div class="muted">${new Date(d.reported_at).toLocaleString("pt-BR")}${d.responsible?" • "+esc(d.responsible):""}</div></div>${d.status==="open"?`<button class="success" onclick="resolveDamage('${d.id}')">Resolver</button>`:`<span class="chip">Resolvida</span>`}</div><p>${esc(d.description)}</p>${d.resolution_notes?`<p class="muted"><strong>Resolução:</strong> ${esc(d.resolution_notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma avaria encontrada.</div>'
+}
+function reportRows(){
+ let from=$("reportFrom").value?new Date($("reportFrom").value+"T00:00:00"):new Date(Date.now()-30*86400000),to=$("reportTo").value?new Date($("reportTo").value+"T23:59:59"):new Date();
+ return activeVessels().map(v=>{
+  let logs=L.filter(l=>l.vessel_id===v.id&&new Date(l.occurred_at)>=from&&new Date(l.occurred_at)<=to),damages=D.filter(d=>d.vessel_id===v.id&&new Date(d.reported_at)>=from&&new Date(d.reported_at)<=to);
+  let uses=logs.filter(l=>l.type==="usage").length,liters=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0),maintenance=logs.filter(l=>l.type==="maintenance").length;
+  let hours=logs.reduce((mx,l)=>Math.max(mx,Number(l.hours||0)),0);
+  return {name:v.name,uses,liters,hours,damages:damages.length,maintenance}
+ })
+}
+function renderReports(){
+ let rows=reportRows(),uses=rows.reduce((s,r)=>s+r.uses,0),liters=rows.reduce((s,r)=>s+r.liters,0),damages=rows.reduce((s,r)=>s+r.damages,0);
+ $("reportSummary").innerHTML=`<div class="kpiList"><div class="kpi"><span>Total de usos</span><strong>${uses}</strong></div><div class="kpi"><span>Combustível</span><strong>${liters.toLocaleString("pt-BR",{maximumFractionDigits:1})} L</strong></div><div class="kpi"><span>Avarias</span><strong>${damages}</strong></div></div>`;
+ $("reportBody").innerHTML=rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.uses}</td><td>${r.liters.toLocaleString("pt-BR",{maximumFractionDigits:1})}</td><td>${r.hours.toLocaleString("pt-BR")}</td><td>${r.damages}</td><td>${r.maintenance}</td></tr>`).join("")
+}
 function renderMore(){
  $("userInfo").textContent=(profile?.display_name||user?.email||"Usuário")+" • "+(profile?.role||"operator");
  let archived=archivedVessels();
  $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
  $("auditList").innerHTML=A.length?A.slice(0,30).map(a=>`<div class="auditLine"><strong>${esc(a.action)}</strong> • ${new Date(a.created_at).toLocaleString("pt-BR")}<div class="muted">${esc(a.entity_type||"")}</div></div>`).join(""):'<div class="empty">Sem alterações registradas.</div>'
 }
-function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderMore()}
+function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderChecklists();renderDamages();renderReports();renderMore()}
 
+window.openChecklist=(vid="")=>{
+ let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
+ $("checklistForm").reset();$("checklistVessel").innerHTML=vesselOptions(vid||active[0].id);$("checklistVessel").value=vid||active[0].id;$("checklistDate").value=localInputNow();$("checklistDialog").showModal()
+};
+$("newChecklist").onclick=()=>openChecklist();
+$("checklistForm").onsubmit=async e=>{
+ e.preventDefault();
+ let payload={vessel_id:$("checklistVessel").value,type:$("checklistType").value,occurred_at:new Date($("checklistDate").value).toISOString(),responsible:$("checklistResponsible").value.trim(),items:{hull:$("ckHull").checked,engine:$("ckEngine").checked,fuel:$("ckFuel").checked,safety:$("ckSafety").checked,radio:$("ckRadio").checked,clean:$("ckClean").checked},notes:$("checklistNotes").value.trim(),created_by:user.id};
+ let {data,error}=await supabase.from('checklists').insert(payload).select().single();if(error)return alert(error.message);await audit("Checklist criado","checklist",data.id,{type:payload.type});$("checklistDialog").close();await loadAll()
+};
+window.openDamage=(vid="")=>{
+ let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
+ $("damageForm").reset();$("damageVessel").innerHTML=vesselOptions(vid||active[0].id);$("damageVessel").value=vid||active[0].id;$("damageDate").value=localInputNow();$("damageDialog").showModal()
+};
+$("newDamage").onclick=()=>openDamage();
+$("damageForm").onsubmit=async e=>{
+ e.preventDefault();let payload={vessel_id:$("damageVessel").value,reported_at:new Date($("damageDate").value).toISOString(),severity:$("damageSeverity").value,responsible:$("damageResponsible").value.trim(),description:$("damageDescription").value.trim(),status:"open",created_by:user.id};
+ let {data,error}=await supabase.from('damages').insert(payload).select().single();if(error)return alert(error.message);await audit("Avaria registrada","damage",data.id,{severity:payload.severity});$("damageDialog").close();await loadAll()
+};
+window.resolveDamage=async id=>{
+ let d=D.find(x=>x.id===id);if(!d)return;let notes=prompt("Descreva o que foi feito para resolver a avaria:");if(notes===null)return;
+ let {error}=await supabase.from('damages').update({status:"resolved",resolved_at:new Date().toISOString(),resolution_notes:notes,resolved_by:user.id}).eq('id',id);if(error)return alert(error.message);await audit("Avaria resolvida","damage",id,{resolution:notes});await loadAll()
+};
 function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"";$("vesselDialogTitle").textContent=v?"Editar embarcação":"Nova embarcação";$("vesselName").value=v?.name||"";$("vesselType").value=v?.type||"Lancha";$("vesselPrefix").value=v?.prefix||"";$("vesselStatus").value=v?.status||"available";$("vesselFuel").value=v?.fuel??"";$("vesselHours").value=v?.hours??"";$("vesselNextMaintenance").value=v?.next_maintenance||"";$("vesselBase").value=v?.base||"";$("vesselNotes").value=v?.notes||"";$("vesselDialog").showModal()}
 window.editVessel=id=>openVessel(vesselBy(id));
 window.removeOrArchiveVessel=async id=>{
@@ -293,7 +451,13 @@ function openReservation(r=null){let active=activeVessels();if(!active.length)re
 $("newReservation").onclick=()=>openReservation();
 $("reservationForm").onsubmit=async e=>{e.preventDefault();let id=$("reservationId").value,start=new Date($("reservationStart").value),end=new Date($("reservationEnd").value);if(!(end>start))return alert("O horário final precisa ser posterior ao inicial.");let payload={vessel_id:$("reservationVessel").value,status:$("reservationStatus").value,start_at:start.toISOString(),end_at:end.toISOString(),purpose:$("reservationPurpose").value.trim(),responsible:$("reservationResponsible").value.trim(),notes:$("reservationNotes").value.trim(),updated_by:user.id,updated_at:new Date().toISOString()};let result=id?await supabase.from('reservations').update(payload).eq('id',id).select().single():await supabase.from('reservations').insert({...payload,created_by:user.id}).select().single();if(result.error)return alert(result.error.message);await audit(id?"Reserva editada":"Reserva criada","reservation",result.data.id,{purpose:payload.purpose});$("reservationDialog").close();await loadAll()}
 
-$("calendarDate").value=localKey(new Date());$("calendarDate").onchange=renderCalendar;$("calendarVessel").onchange=renderCalendar;$("logFilter").onchange=renderLogs;$("logVesselFilter").onchange=renderLogs;
+$("calendarDate").value=localKey(new Date());$("calendarDate").onchange=renderCalendar;$("calendarVessel").onchange=renderCalendar;$("logFilter").onchange=renderLogs;$("logVesselFilter").onchange=renderLogs;$("checklistVesselFilter").onchange=renderChecklists;$("checklistTypeFilter").onchange=renderChecklists;$("damageFilter").onchange=renderDamages;$("damageVesselFilter").onchange=renderDamages;$("reportFrom").onchange=renderReports;$("reportTo").onchange=renderReports;
+document.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-period]").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentPeriod=b.dataset.period;renderDashboard()});
+let nowDate=new Date(),monthAgo=new Date(nowDate.getTime()-30*86400000);$("reportFrom").value=localKey(monthAgo);$("reportTo").value=localKey(nowDate);
+$("exportCsvBtn").onclick=()=>{
+ let rows=reportRows(),csv=["Embarcacao,Usos,Litros,Horas,Avarias,Manutencoes",...rows.map(r=>[r.name,r.uses,r.liters,r.hours,r.damages,r.maintenance].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))].join("\n");
+ let blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="relatorio-nautica-cbmrn.csv";a.click();URL.revokeObjectURL(url)
+};
 $("forceRefresh").onclick=()=>loadAll().catch(e=>alert(e.message));
 $("clearAuditBtn").onclick=async()=>{
  if(!A.length)return alert("O histórico já está vazio.");
