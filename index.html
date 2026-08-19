@@ -367,7 +367,10 @@ function renderChecklists(){
 function renderDamages(){
  let current=$("damageVesselFilter").value;$("damageVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
  let vid=$("damageVesselFilter").value,status=$("damageFilter").value,rows=D.filter(d=>(!vid||d.vessel_id===vid)&&(!status||d.status===status));
- $("damageList").innerHTML=rows.length?rows.map(d=>{let v=vesselBy(d.vessel_id);return`<div class="card ${d.status==="open"?"pendingDamage":"resolvedDamage"}"><div class="row"><div><strong>${esc(vesselLabel(v))} • ${esc(d.severity)}</strong><div class="muted">${new Date(d.reported_at).toLocaleString("pt-BR")}${d.responsible?" • "+esc(d.responsible):""}</div></div>${d.status==="open"?`<button class="success" onclick="resolveDamage('${d.id}')">Resolver</button>`:`<span class="chip">Resolvida</span>`}</div><p>${esc(d.description)}</p>${d.resolution_notes?`<p class="muted"><strong>Resolução:</strong> ${esc(d.resolution_notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma avaria encontrada.</div>'
+ $("damageList").innerHTML=rows.length?rows.map(d=>{
+  let v=vesselBy(d.vessel_id);
+  return `<div class="card ${d.status==="open"?"pendingDamage":"resolvedDamage"}"><div class="row"><div><strong>${esc(vesselLabel(v))} • ${esc(d.severity)}</strong><div class="muted">${new Date(d.reported_at).toLocaleString("pt-BR")}${d.responsible?" • "+esc(d.responsible):""}</div></div><div class="actions">${d.status==="open"?`<button class="success" onclick="resolveDamage('${d.id}')">Resolver</button>`:`<span class="chip">Resolvida</span>`}<button class="danger" onclick="deleteDamage('${d.id}')">Excluir</button></div></div><p>${esc(d.description)}</p>${d.resolution_notes?`<p class="muted"><strong>Resolução:</strong> ${esc(d.resolution_notes)}</p>`:""}</div>`
+ }).join(""):'<div class="card empty">Nenhuma avaria encontrada.</div>'
 }
 function reportRows(){
  let from=$("reportFrom").value?new Date($("reportFrom").value+"T00:00:00"):new Date(Date.now()-30*86400000),to=$("reportTo").value?new Date($("reportTo").value+"T23:59:59"):new Date();
@@ -386,7 +389,7 @@ function renderReports(){
 function renderMore(){
  $("userInfo").textContent=(profile?.display_name||user?.email||"Usuário")+" • "+(profile?.role||"operator");
  let archived=archivedVessels();
- $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
+ $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><div class="actions"><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button><button class="danger" onclick="permanentlyDeleteArchivedVessel('${v.id}')">Excluir definitivamente</button></div></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
  $("auditList").innerHTML=A.length?A.slice(0,30).map(a=>`<div class="auditLine"><strong>${esc(a.action)}</strong> • ${new Date(a.created_at).toLocaleString("pt-BR")}<div class="muted">${esc(a.entity_type||"")}</div></div>`).join(""):'<div class="empty">Sem alterações registradas.</div>'
 }
 function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderChecklists();renderDamages();renderReports();renderMore()}
@@ -458,6 +461,15 @@ window.resolveDamage=async id=>{
  let d=D.find(x=>x.id===id);if(!d)return;let notes=prompt("Descreva o que foi feito para resolver a avaria:");if(notes===null)return;
  let {error}=await supabase.from('damages').update({status:"resolved",resolved_at:new Date().toISOString(),resolution_notes:notes,resolved_by:user.id}).eq('id',id);if(error)return alert(error.message);await audit("Avaria resolvida","damage",id,{resolution:notes});await loadAll()
 };
+window.deleteDamage=async id=>{
+ let d=D.find(x=>x.id===id);if(!d)return;
+ let v=vesselBy(d.vessel_id);
+ if(!confirm("Excluir esta avaria de "+vesselLabel(v)+"? Esta ação não poderá ser desfeita."))return;
+ let {error}=await supabase.from('damages').delete().eq('id',id);
+ if(error)return alert("Não foi possível excluir a avaria: "+error.message);
+ await audit("Avaria excluída","damage",id,{vessel_id:d.vessel_id,description:d.description});
+ await loadAll()
+};
 function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"";$("vesselDialogTitle").textContent=v?"Editar embarcação":"Nova embarcação";$("vesselType").value=v?.type||"Lancha";$("vesselPrefix").value=v?.prefix||"";$("vesselStatus").value=v?.status||"available";$("vesselFuel").value=v?.fuel??"";$("vesselHours").value=v?.hours??"";$("vesselNextMaintenance").value=v?.next_maintenance||"";$("vesselBase").value=v?.base||"";$("vesselNotes").value=v?.notes||"";$("vesselDialog").showModal()}
 window.editVessel=id=>openVessel(vesselBy(id));
 window.removeOrArchiveVessel=async id=>{
@@ -480,6 +492,17 @@ window.restoreVessel=async id=>{
  let {error}=await supabase.from('vessels').update({archived:false,archived_at:null,updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
  if(error)return alert("Não foi possível restaurar: "+error.message);
  await audit("Embarcação restaurada","vessel",id,{name:vesselLabel(vessel)});
+ await loadAll()
+};
+window.permanentlyDeleteArchivedVessel=async id=>{
+ let vessel=vesselBy(id);if(!vessel)return;
+ let first=confirm("ATENÇÃO: excluir definitivamente "+vesselLabel(vessel)+" apagará também todos os usos, reservas, checklists e avarias vinculados. Continuar?");
+ if(!first)return;
+ let typed=prompt('Para confirmar, digite EXCLUIR');
+ if(typed!=="EXCLUIR")return alert("Exclusão cancelada.");
+ let {data,error}=await supabase.rpc('purge_archived_vessel',{p_vessel_id:id});
+ if(error)return alert("Não foi possível excluir definitivamente: "+error.message);
+ alert(vesselLabel(vessel)+" e todo o histórico vinculado foram excluídos definitivamente.");
  await loadAll()
 };
 $("newVessel").onclick=()=>openVessel();
