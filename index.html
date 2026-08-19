@@ -93,7 +93,7 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
    <div class="execCard"><span>Disponíveis</span><strong id="mAvailable">0</strong></div>
    <div class="execCard"><span>Em uso</span><strong id="mInUse">0</strong></div>
    <div class="execCard"><span>Manutenção / indisponíveis</span><strong id="mUnavailable">0</strong></div>
-   <div class="execCard"><span>Reservas de hoje</span><strong id="mReservations">0</strong></div>
+   <div class="execCard"><span>Emprego programado hoje</span><strong id="mReservations">0</strong></div>
    <div class="execCard"><span>Avarias pendentes</span><strong id="mPendingDamage">0</strong></div>
    <div class="execCard"><span>Combustível hoje</span><strong id="mFuel">0 L</strong></div>
    <div class="execCard"><span>Revisões próximas</span><strong id="mMaintenanceDue">0</strong></div>
@@ -325,9 +325,9 @@ function renderDashboard(){
  $("mFleet").textContent=active.length;$("mAvailable").textContent=available;$("mInUse").textContent=inuse;$("mUnavailable").textContent=unavailable;$("mReservations").textContent=todayRes.length;$("mPendingDamage").textContent=pending.length;$("mFuel").textContent=fuel.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L";$("mMaintenanceDue").textContent=due.length;
 
  let from=periodStart(),logs=L.filter(l=>new Date(l.occurred_at)>=from),damages=D.filter(d=>new Date(d.reported_at)>=from),checks=C.filter(c=>new Date(c.occurred_at)>=from);
- let uses=logs.filter(l=>l.type==="usage").length,liters=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0),fuelValue=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_value||0),0),maintenance=logs.filter(l=>l.type==="maintenance").length;
+ let uses=logs.filter(l=>l.type==="usage").length,liters=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0),maintenance=logs.filter(l=>l.type==="maintenance").length;
  $("kpiList").innerHTML=[
-  ["Utilizações",uses],["Combustível",liters.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L"],["Gasto combustível","R$ "+fuelValue.toLocaleString("pt-BR",{minimumFractionDigits:2})],["Avarias registradas",damages.length],["Manutenções",maintenance],["Checklists",checks.length]
+  ["Utilizações",uses],["Combustível",liters.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L"],["Avarias registradas",damages.length],["Manutenções",maintenance],["Checklists",checks.length]
  ].map(([a,b])=>`<div class="kpi"><span>${a}</span><strong>${b}</strong></div>`).join("");
 
  $("todayVessels").innerHTML=active.length?active.map(v=>`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
