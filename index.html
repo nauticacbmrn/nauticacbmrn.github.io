@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Controle de Embarcações • CBMRN</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#111827;--muted:#64748b;--border:#dbe3ef;--soft:#eef3f8;--primary:#0f766e;--danger:#b91c1c;--warning:#b45309;--success:#15803d;--blue:#1d4ed8}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:82px}
+body.dark{--bg:#0b1220;--card:#111827;--text:#e5e7eb;--muted:#94a3b8;--border:#263244;--soft:#172033}
+header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header h1{font-size:1rem;margin:0}header small{color:var(--muted)}
+main{max-width:980px;margin:auto;padding:12px}.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px}.metric span{font-size:.7rem;color:var(--muted);display:block}.metric strong{font-size:1.25rem;display:block;margin-top:4px}
+h2,h3,h4{margin:0 0 8px}p{margin:4px 0}.muted{color:var(--muted);font-size:.78rem}
+button,input,select,textarea{font:inherit}button{border:0;border-radius:9px;padding:9px 11px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:white}.secondary{background:var(--soft);color:var(--text)}.danger{background:#fee2e2;color:var(--danger)}.warning{background:#ffedd5;color:var(--warning)}.success{background:#dcfce7;color:var(--success)}
+.actions{display:flex;gap:7px;flex-wrap:wrap}.actions button{flex:0 0 auto}
+label{display:block;font-size:.72rem;color:var(--muted)}input,select,textarea{width:100%;margin-top:5px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:9px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}.row:last-child{border-bottom:0}
+.badge{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:.64rem;font-weight:800}.available{background:#dcfce7;color:#166534}.inuse{background:#dbeafe;color:#1e40af}.maintenance{background:#ffedd5;color:#9a3412}.unavailable{background:#fee2e2;color:#991b1b}
+.vessel{border:1px solid var(--border);border-radius:12px;margin-bottom:9px;overflow:hidden}.vessel summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto 18px;gap:8px;align-items:center;padding:11px}.vessel summary::-webkit-details-marker{display:none}.vessel summary::after{content:"+";font-weight:900;color:var(--muted)}.vessel[open] summary::after{content:"−"}.vessel[open] summary{border-bottom:1px solid var(--border)}.vesselBody{padding:10px}
+.timeline{border-left:3px solid var(--border);padding-left:10px;margin:10px 0}.timelineItem{padding:6px 0}.timelineItem strong{display:block}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);z-index:30}.bottom button{background:none;color:var(--muted);padding:10px 4px 8px;border-radius:0;font-size:.68rem}.bottom button span{display:block;font-size:1.1rem}.bottom button.active{color:var(--primary)}
+dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);color:var(--text);padding:0;box-shadow:0 20px 60px #0005}dialog::backdrop{background:#0008}.dhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:14px;border-bottom:1px solid var(--border)}.dbody{padding:14px}.dactions{display:flex;justify-content:flex-end;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.empty{text-align:center;color:var(--muted);padding:18px}.onlineDot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#ef4444;margin-right:5px}.onlineDot.ok{background:#22c55e}.sync{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.loginShell{min-height:70vh;display:flex;align-items:center;justify-content:center}.loginCard{width:min(430px,100%)}.hidden{display:none!important}
+.reservation{border:1px solid var(--border);border-radius:10px;padding:9px;margin-bottom:7px}.reservation strong{display:block}.auditLine{font-size:.72rem;padding:7px 0;border-bottom:1px solid var(--border)}.auditLine:last-child{border-bottom:0}
+@media(max-width:720px){.grid3{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.actions button{flex:1}.row{align-items:flex-start}.metric strong{font-size:1.05rem}}
+@media(max-width:420px){main{padding:8px}.grid{grid-template-columns:1fr 1fr;gap:6px}.metric{padding:9px}.metric span{font-size:.62rem}.bottom button{font-size:.61rem}.vessel summary{padding:9px}}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>Controle de Embarcações</h1><small>Frota Náutica • CBMRN</small></div>
+ <div class="actions">
+  <span id="syncState" class="sync"><span id="onlineDot" class="onlineDot"></span><span id="syncText">Desconectado</span></span>
+  <button id="installBtn" class="secondary">Instalar</button>
+  <button id="themeBtn" class="secondary">🌙</button>
+ </div>
+</header>
+
+<main>
+<section id="loginPanel" class="loginShell">
+ <div class="card loginCard">
+  <h2>Acesso</h2>
+  <p class="muted">Entre com a conta fornecida pela administração.</p>
+  <form id="loginForm">
+   <label>E-mail<input id="loginEmail" type="email" autocomplete="username" required></label>
+   <label style="margin-top:9px">Senha<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+   <button class="primary" style="width:100%;margin-top:12px">Entrar</button>
+  </form>
+  <button id="forgotPasswordBtn" type="button" class="secondary" style="width:100%;margin-top:8px">Esqueci minha senha</button>
+  <div id="loginError" class="muted" style="margin-top:8px"></div>
+ </div>
+</section>
+
+<div id="appShell" class="hidden">
+<section id="dashboard" class="panel active">
+ <div class="card">
+  <div class="sectionTitle"><div><h2>Hoje</h2><div id="todayLabel" class="muted"></div></div><button id="newUsageTop" class="primary">+ Registrar uso</button></div>
+  <div class="grid">
+   <div class="metric"><span>Disponíveis</span><strong id="mAvailable">0</strong></div>
+   <div class="metric"><span>Em uso</span><strong id="mInUse">0</strong></div>
+   <div class="metric"><span>Manutenção / indisponíveis</span><strong id="mUnavailable">0</strong></div>
+   <div class="metric"><span>Combustível lançado hoje</span><strong id="mFuel">0 L</strong></div>
+  </div>
+ </div>
+ <div class="card"><h3>Disponibilidade atual</h3><div id="todayVessels"></div></div>
+ <div class="card"><h3>Reservas / programação</h3><div id="todayReservations"></div></div>
+ <div class="card"><h3>Atividades de hoje</h3><div id="todayTimeline"></div></div>
+</section>
+
+<section id="vessels" class="panel">
+ <div class="card sectionTitle"><div><h3>Embarcações</h3><div class="muted">Cadastro, status, combustível e condição.</div></div><button id="newVessel" class="primary">+ Embarcação</button></div>
+ <div id="vesselList"></div>
+</section>
+
+<section id="calendar" class="panel">
+ <div class="card sectionTitle"><div><h3>Agenda</h3><div class="muted">Reservas e disponibilidade futura.</div></div><button id="newReservation" class="primary">+ Reserva</button></div>
+ <div class="card"><div class="grid"><label>Data<input id="calendarDate" type="date"></label><label>Embarcação<select id="calendarVessel"></select></label></div></div>
+ <div id="calendarList"></div>
+</section>
+
+<section id="logs" class="panel">
+ <div class="card sectionTitle"><div><h3>Registros</h3><div class="muted">Uso, combustível, limpeza, manutenção e avarias.</div></div><button id="newLog" class="primary">+ Registro</button></div>
+ <div class="card"><div class="grid"><label>Tipo<select id="logFilter"><option value="">Todos</option><option value="usage">Uso / saída</option><option value="fuel">Combustível</option><option value="cleaning">Limpeza</option><option value="maintenance">Manutenção</option><option value="damage">Avaria</option><option value="inspection">Inspeção</option></select></label><label>Embarcação<select id="logVesselFilter"></select></label></div></div>
+ <div id="logList"></div>
+</section>
+
+<section id="more" class="panel">
+ <div class="card"><h3>Usuário</h3><div id="userInfo" class="muted"></div><div class="actions" style="margin-top:8px"><button id="logoutBtn" class="secondary">Sair</button></div></div>
+ <div class="card"><h3>Sincronização</h3><p class="muted">Os dados são compartilhados pela nuvem. Alterações feitas por outra guarnição aparecem automaticamente.</p><div class="actions"><button id="forceRefresh" class="secondary">Atualizar agora</button></div></div>
+ <div class="card"><h3>Embarcações arquivadas</h3><p class="muted">Embarcações com histórico não são apagadas. Elas ficam arquivadas e podem ser restauradas.</p><div id="archivedVessels"></div></div>
+ <div class="card"><div class="sectionTitle"><div><h3>Histórico de alterações</h3><div class="muted">Registro das alterações realizadas no sistema.</div></div><button id="clearAuditBtn" class="danger">Limpar histórico</button></div><div id="auditList"></div></div>
+</section>
+</div>
+</main>
+
+<nav id="bottomNav" class="bottom hidden">
+ <button class="active" data-nav="dashboard"><span>⌂</span>Hoje</button>
+ <button data-nav="vessels"><span>🚤</span>Frota</button>
+ <button data-nav="calendar"><span>📅</span>Agenda</button>
+ <button data-nav="logs"><span>📝</span>Registros</button>
+ <button data-nav="more"><span>⋯</span>Mais</button>
+</nav>
+
+
+<dialog id="resetPasswordDialog"><form id="resetPasswordForm">
+ <div class="dhead"><div><h3>Definir nova senha</h3><div class="muted">Escolha uma nova senha para sua conta.</div></div></div>
+ <div class="dbody">
+  <label>Nova senha<input id="newPassword" type="password" minlength="8" required></label>
+  <label style="margin-top:9px">Confirmar nova senha<input id="newPasswordConfirm" type="password" minlength="8" required></label>
+  <div id="resetPasswordError" class="muted" style="margin-top:8px"></div>
+ </div>
+ <div class="dactions"><button class="primary">Salvar nova senha</button></div>
+</form></dialog>
+<dialog id="vesselDialog"><form id="vesselForm">
+ <div class="dhead"><div><h3 id="vesselDialogTitle">Nova embarcação</h3><div class="muted">Dados compartilhados com todas as guarnições.</div></div><button type="button" class="secondary" onclick="closeDialog('vesselDialog')">X</button></div>
+ <div class="dbody"><input id="vesselId" type="hidden"><div class="grid">
+  <label>Nome / identificação<input id="vesselName" required></label>
+  <label>Tipo<select id="vesselType"><option>Lancha</option><option>Moto Aquática</option><option>Bote inflável</option><option>Outra</option></select></label>
+  <label>Prefixo / patrimônio<input id="vesselPrefix"></label>
+  <label>Status<select id="vesselStatus"><option value="available">Disponível</option><option value="inuse">Em uso</option><option value="maintenance">Manutenção</option><option value="unavailable">Indisponível</option></select></label>
+  <label>Combustível atual (L)<input id="vesselFuel" inputmode="decimal"></label>
+  <label>Horímetro (h)<input id="vesselHours" inputmode="decimal"></label>
+  <label>Próxima revisão<input id="vesselNextMaintenance" type="date"></label>
+  <label>Base / local<input id="vesselBase"></label>
+ </div><label style="margin-top:8px">Observações<textarea id="vesselNotes" rows="2"></textarea></label></div>
+ <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('vesselDialog')">Cancelar</button><button class="primary">Salvar</button></div>
+</form></dialog>
+
+<dialog id="logDialog"><form id="logForm">
+ <div class="dhead"><div><h3>Novo registro</h3><div class="muted">Uso, combustível, limpeza, manutenção, avaria ou inspeção.</div></div><button type="button" class="secondary" onclick="closeDialog('logDialog')">X</button></div>
+ <div class="dbody"><div class="grid">
+  <label>Embarcação<select id="logVessel" required></select></label>
+  <label>Tipo<select id="logType"><option value="usage">Uso / saída</option><option value="fuel">Combustível</option><option value="cleaning">Limpeza</option><option value="maintenance">Manutenção</option><option value="damage">Avaria</option><option value="inspection">Inspeção</option></select></label>
+  <label>Data e hora<input id="logDate" type="datetime-local" required></label>
+  <label>Responsável / guarnição<input id="logResponsible"></label>
+  <label id="fuelLitersWrap">Litros abastecidos<input id="logFuelLiters" inputmode="decimal"></label>
+  <label id="fuelValueWrap">Valor do abastecimento<input id="logFuelValue" inputmode="decimal"></label>
+  <label>Horímetro após registro<input id="logHours" inputmode="decimal"></label>
+  <label>Status após registro<select id="logAfterStatus"><option value="">Manter atual</option><option value="available">Disponível</option><option value="inuse">Em uso</option><option value="maintenance">Manutenção</option><option value="unavailable">Indisponível</option></select></label>
+ </div><label style="margin-top:8px">O que foi feito / observações<textarea id="logNotes" rows="3"></textarea></label></div>
+ <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('logDialog')">Cancelar</button><button class="primary">Salvar registro</button></div>
+</form></dialog>
+
+<dialog id="reservationDialog"><form id="reservationForm">
+ <div class="dhead"><div><h3>Reservar embarcação</h3><div class="muted">A reserva fica visível para todas as guarnições.</div></div><button type="button" class="secondary" onclick="closeDialog('reservationDialog')">X</button></div>
+ <div class="dbody"><input id="reservationId" type="hidden"><div class="grid">
+  <label>Embarcação<select id="reservationVessel" required></select></label>
+  <label>Status<select id="reservationStatus"><option value="scheduled">Programada</option><option value="completed">Concluída</option><option value="cancelled">Cancelada</option></select></label>
+  <label>Início<input id="reservationStart" type="datetime-local" required></label>
+  <label>Fim<input id="reservationEnd" type="datetime-local" required></label>
+  <label>Finalidade<input id="reservationPurpose" placeholder="Ex.: patrulhamento / instrução"></label>
+  <label>Responsável / guarnição<input id="reservationResponsible"></label>
+ </div><label style="margin-top:8px">Observações<textarea id="reservationNotes" rows="2"></textarea></label></div>
+ <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('reservationDialog')">Cancelar</button><button class="primary">Salvar reserva</button></div>
+</form></dialog>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.js';
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+const n=v=>{let x=String(v??"").trim().replace(/[^\d,.-]/g,"");if(x.includes(","))x=x.replace(/\./g,"").replace(",",".");let z=Number(x);return Number.isFinite(z)?z:0};
+const localKey=v=>{let d=v instanceof Date?v:new Date(v);return Number.isNaN(d.getTime())?"":`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const localInputNow=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+const statusLabel=s=>({available:"Disponível",inuse:"Em uso",maintenance:"Manutenção",unavailable:"Indisponível"}[s]||s);
+const typeLabel=t=>({usage:"Uso / saída",fuel:"Combustível",cleaning:"Limpeza",maintenance:"Manutenção",damage:"Avaria",inspection:"Inspeção"}[t]||t);
+
+if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY||SUPABASE_URL.includes("COLE_")){
+ document.body.innerHTML='<main><div class="card"><h2>Configuração necessária</h2><p>Edite o arquivo <strong>config.js</strong> e informe a URL e a chave publicável do seu projeto Supabase.</p></div></main>';
+ throw new Error("Supabase não configurado");
+}
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+let user=null,profile=null,V=[],L=[],R=[],A=[],reloadTimer=null,realtimeChannel=null;
+
+window.closeDialog=id=>$(id).close();
+
+function setSync(ok,text){$("onlineDot").classList.toggle("ok",ok);$("syncText").textContent=text}
+function showAuth(logged){$("loginPanel").classList.toggle("hidden",logged);$("appShell").classList.toggle("hidden",!logged);$("bottomNav").classList.toggle("hidden",!logged)}
+function nav(id){document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav===id));window.scrollTo(0,0)}
+document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+
+async function loadProfile(){
+ const {data,error}=await supabase.from('profiles').select('*').eq('id',user.id).maybeSingle();
+ if(error)console.warn(error);
+ profile=data||{id:user.id,display_name:user.email,role:'operator'};
+}
+async function loadAll(){
+ if(!user)return;
+ setSync(false,"Sincronizando…");
+ const [v,l,r,a]=await Promise.all([
+  supabase.from('vessels').select('*').order('name'),
+  supabase.from('vessel_logs').select('*').order('occurred_at',{ascending:false}).limit(1000),
+  supabase.from('reservations').select('*').order('start_at',{ascending:true}).limit(1000),
+  supabase.from('audit_events').select('*').order('created_at',{ascending:false}).limit(100)
+ ]);
+ for(const result of [v,l,r,a])if(result.error)throw result.error;
+ V=v.data||[];L=l.data||[];R=r.data||[];A=a.data||[];
+ render();setSync(true,"Atualizado");
+}
+function scheduleReload(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>loadAll().catch(e=>{console.error(e);setSync(false,"Erro de sincronização")}),250)}
+function subscribeRealtime(){
+ if(realtimeChannel)supabase.removeChannel(realtimeChannel);
+ realtimeChannel=supabase.channel('cbmrn-frota-sync')
+  .on('postgres_changes',{event:'*',schema:'public',table:'vessels'},scheduleReload)
+  .on('postgres_changes',{event:'*',schema:'public',table:'vessel_logs'},scheduleReload)
+  .on('postgres_changes',{event:'*',schema:'public',table:'reservations'},scheduleReload)
+  .on('postgres_changes',{event:'*',schema:'public',table:'audit_events'},scheduleReload)
+  .subscribe(status=>setSync(status==='SUBSCRIBED',status==='SUBSCRIBED'?'Tempo real ativo':'Conectando…'));
+}
+async function audit(action,entityType,entityId,details={}){
+ const payload={action,entity_type:entityType,entity_id:entityId||null,details,created_by:user.id};
+ const {error}=await supabase.from('audit_events').insert(payload);if(error)console.warn("Audit",error)
+}
+function vesselBy(id){return V.find(v=>v.id===id)}
+function activeVessels(){return V.filter(v=>!v.archived)}
+function archivedVessels(){return V.filter(v=>v.archived)}
+function vesselOptions(selected=""){return '<option value="">Selecione</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===selected?"selected":""}>${esc(v.name)}</option>`).join("")}
+
+function renderDashboard(){
+ let today=localKey(new Date()),todayLogs=L.filter(l=>localKey(l.occurred_at)===today),active=activeVessels(),available=active.filter(v=>v.status==="available").length,inuse=active.filter(v=>v.status==="inuse").length,unavailable=active.length-available-inuse,fuel=todayLogs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0);
+ $("todayLabel").textContent=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+ $("mAvailable").textContent=available;$("mInUse").textContent=inuse;$("mUnavailable").textContent=unavailable;$("mFuel").textContent=fuel.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L";
+ $("todayVessels").innerHTML=activeVessels().length?activeVessels().map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
+ let todayRes=R.filter(r=>r.status==="scheduled"&&(localKey(r.start_at)===today||localKey(r.end_at)===today));
+ $("todayReservations").innerHTML=todayRes.length?todayRes.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="reservation"><strong>${esc(v?.name||"Embarcação")} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}${r.responsible?" • "+esc(r.responsible):""}</div></div>`}).join(""):'<div class="empty">Nenhuma reserva para hoje.</div>';
+ $("todayTimeline").innerHTML=todayLogs.length?todayLogs.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="timeline"><div class="timelineItem"><strong>${new Date(l.occurred_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} • ${esc(typeLabel(l.type))}</strong><span>${esc(v?.name||"Embarcação")}${l.responsible?" • "+esc(l.responsible):""}</span>${l.notes?`<div class="muted">${esc(l.notes)}</div>`:""}</div></div>`}).join(""):'<div class="empty">Nenhuma atividade hoje.</div>';
+}
+function renderVessels(){
+ $("vesselList").innerHTML=activeVessels().length?activeVessels().map(v=>`<details class="vessel"><summary><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.prefix?"• "+esc(v.prefix):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></summary><div class="vesselBody"><div class="grid"><div><span class="muted">Combustível</span><strong>${Number(v.fuel||0).toLocaleString("pt-BR")} L</strong></div><div><span class="muted">Horímetro</span><strong>${Number(v.hours||0).toLocaleString("pt-BR")} h</strong></div><div><span class="muted">Base</span><strong>${esc(v.base||"—")}</strong></div><div><span class="muted">Próxima revisão</span><strong>${v.next_maintenance?new Date(v.next_maintenance+"T12:00").toLocaleDateString("pt-BR"):"—"}</strong></div></div>${v.notes?`<p class="muted" style="margin-top:8px">${esc(v.notes)}</p>`:""}<div class="actions" style="margin-top:9px"><button class="primary" onclick="openLog('${v.id}','usage')">Registrar uso</button><button class="secondary" onclick="openLog('${v.id}','fuel')">Combustível</button><button class="secondary" onclick="editVessel('${v.id}')">Editar</button><button class="danger" onclick="removeOrArchiveVessel('${v.id}')">Excluir</button></div></div></details>`).join(""):'<div class="card empty">Nenhuma embarcação cadastrada.</div>'
+}
+function renderCalendar(){
+ $("calendarVessel").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join("");
+ let date=$("calendarDate").value||localKey(new Date()),vid=$("calendarVessel").value,rows=R.filter(r=>(!vid||r.vessel_id===vid)&&(localKey(r.start_at)===date||localKey(r.end_at)===date)).sort((a,b)=>a.start_at.localeCompare(b.start_at));
+ $("calendarList").innerHTML=rows.length?rows.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="card"><div class="row"><div><strong>${esc(v?.name||"Embarcação")} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}</div></div><span class="badge ${r.status==="cancelled"?"unavailable":r.status==="completed"?"available":"inuse"}">${esc(r.status)}</span></div>${r.responsible?`<p>Responsável: ${esc(r.responsible)}</p>`:""}${r.notes?`<p class="muted">${esc(r.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma reserva nesta data.</div>'
+}
+function renderLogs(){
+ let current=$("logVesselFilter").value;$("logVesselFilter").innerHTML='<option value="">Todas</option>'+V.map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let type=$("logFilter").value,vid=$("logVesselFilter").value,rows=L.filter(l=>(!type||l.type===type)&&(!vid||l.vessel_id===vid));
+ $("logList").innerHTML=rows.length?rows.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="card"><strong>${esc(typeLabel(l.type))}</strong><div class="muted">${new Date(l.occurred_at).toLocaleString("pt-BR")} • ${esc(v?.name||"Embarcação")}</div>${l.responsible?`<p><strong>Responsável:</strong> ${esc(l.responsible)}</p>`:""}${l.type==="fuel"?`<p><strong>Combustível:</strong> ${Number(l.fuel_liters||0).toLocaleString("pt-BR")} L${l.fuel_value?` • R$ ${Number(l.fuel_value).toLocaleString("pt-BR",{minimumFractionDigits:2})}`:""}</p>`:""}${l.notes?`<p class="muted">${esc(l.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum registro encontrado.</div>'
+}
+function renderMore(){
+ $("userInfo").textContent=(profile?.display_name||user?.email||"Usuário")+" • "+(profile?.role||"operator");
+ let archived=archivedVessels();
+ $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
+ $("auditList").innerHTML=A.length?A.slice(0,30).map(a=>`<div class="auditLine"><strong>${esc(a.action)}</strong> • ${new Date(a.created_at).toLocaleString("pt-BR")}<div class="muted">${esc(a.entity_type||"")}</div></div>`).join(""):'<div class="empty">Sem alterações registradas.</div>'
+}
+function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderMore()}
+
+function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"";$("vesselDialogTitle").textContent=v?"Editar embarcação":"Nova embarcação";$("vesselName").value=v?.name||"";$("vesselType").value=v?.type||"Lancha";$("vesselPrefix").value=v?.prefix||"";$("vesselStatus").value=v?.status||"available";$("vesselFuel").value=v?.fuel??"";$("vesselHours").value=v?.hours??"";$("vesselNextMaintenance").value=v?.next_maintenance||"";$("vesselBase").value=v?.base||"";$("vesselNotes").value=v?.notes||"";$("vesselDialog").showModal()}
+window.editVessel=id=>openVessel(vesselBy(id));
+window.removeOrArchiveVessel=async id=>{
+ let vessel=vesselBy(id);if(!vessel)return;
+ let hasLogs=L.some(l=>l.vessel_id===id),hasReservations=R.some(r=>r.vessel_id===id);
+ if(!hasLogs&&!hasReservations){
+  if(!confirm("Esta embarcação não possui histórico. Excluir definitivamente "+vessel.name+"?"))return;
+  let {error}=await supabase.from('vessels').delete().eq('id',id);
+  if(error)return alert("Não foi possível excluir: "+error.message);
+  await audit("Embarcação excluída definitivamente","vessel",id,{name:vessel.name});
+ }else{
+  if(!confirm(vessel.name+" possui histórico. Ela será arquivada para preservar os registros. Continuar?"))return;
+  let {error}=await supabase.from('vessels').update({archived:true,archived_at:new Date().toISOString(),updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error)return alert("Não foi possível arquivar: "+error.message);
+  await audit("Embarcação arquivada","vessel",id,{name:vessel.name});
+ }
+ await loadAll()
+};
+window.restoreVessel=async id=>{
+ let vessel=vesselBy(id);if(!vessel)return;
+ let {error}=await supabase.from('vessels').update({archived:false,archived_at:null,updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
+ if(error)return alert("Não foi possível restaurar: "+error.message);
+ await audit("Embarcação restaurada","vessel",id,{name:vessel.name});
+ await loadAll()
+};
+$("newVessel").onclick=()=>openVessel();
+$("vesselForm").onsubmit=async e=>{e.preventDefault();let id=$("vesselId").value,payload={name:$("vesselName").value.trim(),type:$("vesselType").value,prefix:$("vesselPrefix").value.trim(),status:$("vesselStatus").value,fuel:n($("vesselFuel").value),hours:n($("vesselHours").value),next_maintenance:$("vesselNextMaintenance").value||null,base:$("vesselBase").value.trim(),notes:$("vesselNotes").value.trim(),updated_by:user.id,updated_at:new Date().toISOString()};let result=id?await supabase.from('vessels').update(payload).eq('id',id).select().single():await supabase.from('vessels').insert({...payload,created_by:user.id}).select().single();if(result.error)return alert(result.error.message);await audit(id?"Embarcação editada":"Embarcação cadastrada","vessel",result.data.id,{name:payload.name});$("vesselDialog").close();await loadAll()}
+
+function setLogFields(){let fuel=$("logType").value==="fuel";$("fuelLitersWrap").style.display=fuel?"block":"none";$("fuelValueWrap").style.display=fuel?"block":"none"}
+window.openLog=(vid="",type="usage")=>{let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");$("logForm").reset();$("logVessel").innerHTML=vesselOptions(vid||active[0].id);$("logVessel").value=vid||active[0].id;$("logType").value=type;$("logDate").value=localInputNow();setLogFields();$("logDialog").showModal()}
+$("newLog").onclick=()=>openLog();$("newUsageTop").onclick=()=>openLog("","usage");$("logType").onchange=setLogFields;
+$("logForm").onsubmit=async e=>{e.preventDefault();let vessel=vesselBy($("logVessel").value);if(!vessel)return;let payload={vessel_id:vessel.id,type:$("logType").value,occurred_at:new Date($("logDate").value).toISOString(),responsible:$("logResponsible").value.trim(),fuel_liters:n($("logFuelLiters").value),fuel_value:n($("logFuelValue").value),hours:n($("logHours").value),after_status:$("logAfterStatus").value||null,notes:$("logNotes").value.trim(),created_by:user.id};let {data,error}=await supabase.from('vessel_logs').insert(payload).select().single();if(error)return alert(error.message);let updates={updated_by:user.id,updated_at:new Date().toISOString()};if(payload.type==="fuel"&&payload.fuel_liters)updates.fuel=Number(vessel.fuel||0)+payload.fuel_liters;if(payload.hours>0)updates.hours=payload.hours;if(payload.after_status)updates.status=payload.after_status;await supabase.from('vessels').update(updates).eq('id',vessel.id);await audit("Registro criado","vessel_log",data.id,{type:payload.type,vessel:vessel.name});$("logDialog").close();await loadAll()}
+
+function openReservation(r=null){let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");$("reservationForm").reset();$("reservationId").value=r?.id||"";$("reservationVessel").innerHTML=vesselOptions(r?.vessel_id||active[0].id);$("reservationVessel").value=r?.vessel_id||active[0].id;$("reservationStatus").value=r?.status||"scheduled";$("reservationStart").value=r?new Date(new Date(r.start_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16):localInputNow();$("reservationEnd").value=r?new Date(new Date(r.end_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16):"";$("reservationPurpose").value=r?.purpose||"";$("reservationResponsible").value=r?.responsible||"";$("reservationNotes").value=r?.notes||"";$("reservationDialog").showModal()}
+$("newReservation").onclick=()=>openReservation();
+$("reservationForm").onsubmit=async e=>{e.preventDefault();let id=$("reservationId").value,start=new Date($("reservationStart").value),end=new Date($("reservationEnd").value);if(!(end>start))return alert("O horário final precisa ser posterior ao inicial.");let payload={vessel_id:$("reservationVessel").value,status:$("reservationStatus").value,start_at:start.toISOString(),end_at:end.toISOString(),purpose:$("reservationPurpose").value.trim(),responsible:$("reservationResponsible").value.trim(),notes:$("reservationNotes").value.trim(),updated_by:user.id,updated_at:new Date().toISOString()};let result=id?await supabase.from('reservations').update(payload).eq('id',id).select().single():await supabase.from('reservations').insert({...payload,created_by:user.id}).select().single();if(result.error)return alert(result.error.message);await audit(id?"Reserva editada":"Reserva criada","reservation",result.data.id,{purpose:payload.purpose});$("reservationDialog").close();await loadAll()}
+
+$("calendarDate").value=localKey(new Date());$("calendarDate").onchange=renderCalendar;$("calendarVessel").onchange=renderCalendar;$("logFilter").onchange=renderLogs;$("logVesselFilter").onchange=renderLogs;
+$("forceRefresh").onclick=()=>loadAll().catch(e=>alert(e.message));
+$("clearAuditBtn").onclick=async()=>{
+ if(!A.length)return alert("O histórico já está vazio.");
+ if(!confirm("Excluir todo o histórico de alterações? Esta ação não poderá ser desfeita."))return;
+ let {error}=await supabase.from('audit_events').delete().gte('id',0);
+ if(error)return alert("Não foi possível limpar o histórico: "+error.message);
+ A=[];renderMore();alert("Histórico de alterações excluído.")
+};
+$("logoutBtn").onclick=()=>supabase.auth.signOut();
+$("themeBtn").onclick=()=>{document.body.classList.toggle("dark");localStorage.setItem("boatTheme",document.body.classList.contains("dark")?"dark":"light");$("themeBtn").textContent=document.body.classList.contains("dark")?"☀️":"🌙"};
+if(localStorage.getItem("boatTheme")==="dark"){document.body.classList.add("dark");$("themeBtn").textContent="☀️"}
+
+$("loginForm").onsubmit=async e=>{e.preventDefault();$("loginError").textContent="Entrando…";let {error}=await supabase.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});$("loginError").textContent=error?error.message:""};
+$("forgotPasswordBtn").onclick=async()=>{
+ let email=$("loginEmail").value.trim();
+ if(!email){email=prompt("Digite o e-mail da sua conta:")||""}
+ if(!email)return;
+ $("loginError").textContent="Enviando e-mail...";
+ let redirectTo=location.origin+location.pathname;
+ let {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo});
+ $("loginError").textContent=error?error.message:"Se o e-mail estiver cadastrado, enviaremos um link para redefinir a senha."
+};
+$("resetPasswordForm").onsubmit=async e=>{
+ e.preventDefault();
+ let p1=$("newPassword").value,p2=$("newPasswordConfirm").value;
+ if(p1.length<8){$("resetPasswordError").textContent="A senha precisa ter pelo menos 8 caracteres.";return}
+ if(p1!==p2){$("resetPasswordError").textContent="As senhas não coincidem.";return}
+ $("resetPasswordError").textContent="Salvando...";
+ let {error}=await supabase.auth.updateUser({password:p1});
+ if(error){$("resetPasswordError").textContent=error.message;return}
+ $("resetPasswordError").textContent="Senha alterada com sucesso.";
+ setTimeout(()=>$("resetPasswordDialog").close(),800)
+};
+
+let deferredInstall=null;
+function updateInstallButton(){
+ let installed=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+ $("installBtn").style.display=installed?"none":"inline-block"
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;updateInstallButton()});
+window.addEventListener("appinstalled",()=>{deferredInstall=null;updateInstallButton()});
+$("installBtn").onclick=async()=>{
+ if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;updateInstallButton();return}
+ if(/iphone|ipad|ipod/i.test(navigator.userAgent)){
+  alert("No iPhone/iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.");
+ }else{
+  alert("Abra o menu do navegador e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”.");
+ }
+};
+updateInstallButton();
+
+supabase.auth.onAuthStateChange(async(event,session)=>{
+ user=session?.user||null;
+ if(event==="PASSWORD_RECOVERY"){
+  showAuth(false);
+  setTimeout(()=>$("resetPasswordDialog").showModal(),100);
+  return
+ }
+ if(user){showAuth(true);await loadProfile();$("userInfo").textContent=user.email;subscribeRealtime();try{await loadAll()}catch(e){console.error(e);setSync(false,"Erro");alert("Erro ao carregar dados: "+e.message)}}
+ else{showAuth(false);V=[];L=[];R=[];A=[];if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null}setSync(false,"Desconectado")}
+});
+const {data:{session}}=await supabase.auth.getSession();
+if(session?.user){user=session.user;showAuth(true);await loadProfile();subscribeRealtime();await loadAll()}else showAuth(false);
+</script>
+</body>
+</html>
