@@ -224,7 +224,8 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 
 
 <dialog id="checklistDialog"><form id="checklistForm">
- <div class="dhead"><div><h3>Novo checklist</h3><div class="muted">Inspeção operacional da embarcação.</div></div><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">X</button></div>
+ <input id="checklistId" type="hidden">
+ <div class="dhead"><div><h3 id="checklistDialogTitle">Novo checklist</h3><div class="muted">Inspeção operacional da embarcação.</div></div><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">X</button></div>
  <div class="dbody">
   <div class="grid"><label>Embarcação<select id="checklistVessel" required></select></label><label>Tipo<select id="checklistType"><option value="pre">Pré-uso</option><option value="post">Pós-uso</option></select></label><label>Responsável / guarnição<input id="checklistResponsible"></label><label>Data e hora<input id="checklistDate" type="datetime-local" required></label></div>
   <div class="checklistStatusGrid" style="margin-top:10px"><div class="checkStatusRow"><strong>Casco / estrutura</strong><select id="ckHull" onchange="toggleChecklistNote('Hull')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckHullNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Motor / propulsão</strong><select id="ckEngine" onchange="toggleChecklistNote('Engine')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckEngineNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Combustível</strong><select id="ckFuel" onchange="toggleChecklistNote('Fuel')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckFuelNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Equipamentos de segurança</strong><select id="ckSafety" onchange="toggleChecklistNote('Safety')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckSafetyNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Comunicação</strong><select id="ckRadio" onchange="toggleChecklistNote('Radio')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckRadioNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Limpeza / organização</strong><select id="ckClean" onchange="toggleChecklistNote('Clean')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckCleanNote" class="hidden" placeholder="Descreva a alteração"></div></div>
@@ -358,7 +359,10 @@ function renderLogs(){
 function renderChecklists(){
  let current=$("checklistVesselFilter").value;$("checklistVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
  let vid=$("checklistVesselFilter").value,type=$("checklistTypeFilter").value,rows=C.filter(c=>(!vid||c.vessel_id===vid)&&(!type||c.type===type));
- $("checklistList").innerHTML=rows.length?rows.map(c=>{let v=vesselBy(c.vessel_id),vals=Object.values(c.items||{}),ok=vals.filter(x=>(typeof x==="object"?x.status:x)==="ok").length,alt=vals.filter(x=>(typeof x==="object"?x.status:x)==="alteration").length,total=vals.length,cond={fit:"🟢 Apta",caution:"🟡 Ressalva",unfit:"🔴 Inapta"}[c.condition]||"";return`<div class="card"><div class="row"><div><strong>${c.type==="pre"?"Pré-uso":"Pós-uso"} • ${esc(vesselLabel(v))}</strong><div class="muted">${new Date(c.occurred_at).toLocaleString("pt-BR")}${c.responsible?" • "+esc(c.responsible):""}</div></div><span class="chip">${cond||`${ok} OK / ${alt} alt.`}</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum checklist encontrado.</div>'
+ $("checklistList").innerHTML=rows.length?rows.map(c=>{
+  let v=vesselBy(c.vessel_id),vals=Object.values(c.items||{}),ok=vals.filter(x=>(typeof x==="object"?x.status:x)==="ok").length,alt=vals.filter(x=>(typeof x==="object"?x.status:x)==="alteration").length,total=vals.length,cond={fit:"🟢 Apta",caution:"🟡 Ressalva",unfit:"🔴 Inapta"}[c.condition]||"";
+  return `<div class="card"><div class="row"><div><strong>${c.type==="pre"?"Pré-uso":"Pós-uso"} • ${esc(vesselLabel(v))}</strong><div class="muted">${new Date(c.occurred_at).toLocaleString("pt-BR")}${c.responsible?" • "+esc(c.responsible):""}</div></div><span class="chip">${cond||`${ok} OK / ${alt} alt.`}</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:""}<div class="actions" style="margin-top:8px"><button class="secondary" onclick="editChecklist('${c.id}')">Editar</button><button class="danger" onclick="deleteChecklist('${c.id}')">Excluir</button></div></div>`
+ }).join(""):'<div class="card empty">Nenhum checklist encontrado.</div>'
 }
 function renderDamages(){
  let current=$("damageVesselFilter").value;$("damageVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
@@ -388,19 +392,39 @@ function renderMore(){
 function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderChecklists();renderDamages();renderReports();renderMore()}
 
 window.toggleChecklistNote=key=>{let s=$("ck"+key),n=$("ck"+key+"Note");n.classList.toggle("hidden",s.value!=="alteration");if(s.value!=="alteration")n.value=""};
-window.openChecklist=(vid="")=>{
+window.openChecklist=(vid="",record=null)=>{
  let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
- $("checklistForm").reset();$("checklistVessel").innerHTML=vesselOptions(vid||active[0].id);$("checklistVessel").value=vid||active[0].id;$("checklistDate").value=localInputNow();$("checklistDialog").showModal()
+ $("checklistForm").reset();
+ $("checklistId").value=record?.id||"";
+ $("checklistDialogTitle").textContent=record?"Editar checklist":"Novo checklist";
+ $("checklistVessel").innerHTML=vesselOptions(record?.vessel_id||vid||active[0].id);
+ $("checklistVessel").value=record?.vessel_id||vid||active[0].id;
+ $("checklistType").value=record?.type||"pre";
+ $("checklistResponsible").value=record?.responsible||"";
+ let dt=record?new Date(new Date(record.occurred_at).getTime()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16):localInputNow();
+ $("checklistDate").value=dt;
+ let items=record?.items||{};
+ let map={Hull:"hull",Engine:"engine",Fuel:"fuel",Safety:"safety",Radio:"radio",Clean:"clean"};
+ Object.entries(map).forEach(([key,k])=>{
+  let item=items[k]||{},status=typeof item==="object"?(item.status||"ok"):(item===true?"ok":"na"),note=typeof item==="object"?(item.note||""):"";
+  $("ck"+key).value=status;$("ck"+key+"Note").value=note;$("ck"+key+"Note").classList.toggle("hidden",status!=="alteration")
+ });
+ $("checklistCondition").value=record?.condition||"fit";
+ $("checklistNotes").value=record?.notes||"";
+ $("checklistCreateDamage").checked=false;
+ $("checklistDialog").showModal()
 };
+window.editChecklist=id=>{let record=C.find(c=>c.id===id);if(record)openChecklist("",record)};
 $("newChecklist").onclick=()=>openChecklist();
 $("checklistForm").onsubmit=async e=>{
  e.preventDefault();
- let keys=["Hull","Engine","Fuel","Safety","Radio","Clean"],items={};
+ let id=$("checklistId").value,keys=["Hull","Engine","Fuel","Safety","Radio","Clean"],items={};
  for(let key of keys){items[key.toLowerCase()]={status:$("ck"+key).value,note:$("ck"+key+"Note").value.trim()}}
  let condition=$("checklistCondition").value;
- let payload={vessel_id:$("checklistVessel").value,type:$("checklistType").value,occurred_at:new Date($("checklistDate").value).toISOString(),responsible:$("checklistResponsible").value.trim(),items,condition,notes:$("checklistNotes").value.trim(),created_by:user.id};
- let {data,error}=await supabase.from('checklists').insert(payload).select().single();if(error)return alert(error.message);
- if($("checklistCreateDamage").checked){
+ let payload={vessel_id:$("checklistVessel").value,type:$("checklistType").value,occurred_at:new Date($("checklistDate").value).toISOString(),responsible:$("checklistResponsible").value.trim(),items,condition,notes:$("checklistNotes").value.trim()};
+ let result=id?await supabase.from('checklists').update(payload).eq('id',id).select().single():await supabase.from('checklists').insert({...payload,created_by:user.id}).select().single();
+ if(result.error)return alert(result.error.message);
+ if(!id&&$("checklistCreateDamage").checked){
   let altered=Object.entries(items).filter(([k,x])=>x.status==="alteration");
   for(let [k,x] of altered){
    let label={hull:"Casco / estrutura",engine:"Motor / propulsão",fuel:"Combustível",safety:"Equipamentos de segurança",radio:"Comunicação",clean:"Limpeza / organização"}[k]||k;
@@ -409,8 +433,18 @@ $("checklistForm").onsubmit=async e=>{
   }
  }
  if(condition==="unfit"){await supabase.from('vessels').update({status:"unavailable",updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',payload.vessel_id)}
- await audit("Checklist criado","checklist",data.id,{type:payload.type,condition});$("checklistDialog").close();await loadAll()
+ await audit(id?"Checklist editado":"Checklist criado","checklist",result.data.id,{type:payload.type,condition});
+ $("checklistDialog").close();await loadAll()
 };
+window.deleteChecklist=async id=>{
+ let record=C.find(c=>c.id===id);if(!record)return;
+ if(!confirm("Excluir este checklist? Esta ação não poderá ser desfeita."))return;
+ let {error}=await supabase.from('checklists').delete().eq('id',id);
+ if(error)return alert("Não foi possível excluir o checklist: "+error.message);
+ await audit("Checklist excluído","checklist",id,{vessel_id:record.vessel_id,type:record.type});
+ await loadAll()
+};
+
 window.openDamage=(vid="")=>{
  let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
  $("damageForm").reset();$("damageVessel").innerHTML=vesselOptions(vid||active[0].id);$("damageVessel").value=vid||active[0].id;$("damageDate").value=localInputNow();$("damageDialog").showModal()
