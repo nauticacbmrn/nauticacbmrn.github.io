@@ -56,6 +56,7 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 .reportTable th{color:var(--muted);font-size:.68rem}
 .chip{display:inline-flex;border-radius:999px;padding:3px 7px;font-size:.62rem;font-weight:800;background:var(--soft)}
 @media(max-width:760px){.executiveGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.kpiList{grid-template-columns:repeat(2,minmax(0,1fr))}.profileStats{grid-template-columns:repeat(2,minmax(0,1fr))}.checklistGrid{grid-template-columns:1fr}}
+.checklistStatusGrid{display:grid;gap:7px}.checkStatusRow{display:grid;grid-template-columns:1fr 145px;gap:7px;align-items:center;border:1px solid var(--border);padding:8px;border-radius:9px;background:var(--soft)}.checkStatusRow input{grid-column:1/-1}.hidden{display:none!important}@media(max-width:520px){.checkStatusRow{grid-template-columns:1fr 125px}}
 </style>
 </head>
 <body>
@@ -181,7 +182,7 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
 <dialog id="vesselDialog"><form id="vesselForm">
  <div class="dhead"><div><h3 id="vesselDialogTitle">Nova embarcação</h3><div class="muted">Dados compartilhados com todas as guarnições.</div></div><button type="button" class="secondary" onclick="closeDialog('vesselDialog')">X</button></div>
  <div class="dbody"><input id="vesselId" type="hidden"><div class="grid">
-  <label>Nome / identificação<input id="vesselName" required></label>
+  
   <label>Tipo<select id="vesselType"><option>Lancha</option><option>Moto Aquática</option><option>Bote inflável</option><option>Outra</option></select></label>
   <label>Prefixo / patrimônio<input id="vesselPrefix"></label>
   <label>Status<select id="vesselStatus"><option value="available">Disponível</option><option value="inuse">Em uso</option><option value="maintenance">Manutenção</option><option value="unavailable">Indisponível</option></select></label>
@@ -226,14 +227,8 @@ dialog{border:0;border-radius:14px;width:min(720px,94vw);background:var(--card);
  <div class="dhead"><div><h3>Novo checklist</h3><div class="muted">Inspeção operacional da embarcação.</div></div><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">X</button></div>
  <div class="dbody">
   <div class="grid"><label>Embarcação<select id="checklistVessel" required></select></label><label>Tipo<select id="checklistType"><option value="pre">Pré-uso</option><option value="post">Pós-uso</option></select></label><label>Responsável / guarnição<input id="checklistResponsible"></label><label>Data e hora<input id="checklistDate" type="datetime-local" required></label></div>
-  <div class="checklistGrid" style="margin-top:10px">
-   <label class="checkItem"><input id="ckHull" type="checkbox"> Casco / estrutura</label>
-   <label class="checkItem"><input id="ckEngine" type="checkbox"> Motor / propulsão</label>
-   <label class="checkItem"><input id="ckFuel" type="checkbox"> Combustível suficiente</label>
-   <label class="checkItem"><input id="ckSafety" type="checkbox"> Equipamentos de segurança</label>
-   <label class="checkItem"><input id="ckRadio" type="checkbox"> Comunicação</label>
-   <label class="checkItem"><input id="ckClean" type="checkbox"> Limpeza / organização</label>
-  </div>
+  <div class="checklistStatusGrid" style="margin-top:10px"><div class="checkStatusRow"><strong>Casco / estrutura</strong><select id="ckHull" onchange="toggleChecklistNote('Hull')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckHullNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Motor / propulsão</strong><select id="ckEngine" onchange="toggleChecklistNote('Engine')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckEngineNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Combustível</strong><select id="ckFuel" onchange="toggleChecklistNote('Fuel')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckFuelNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Equipamentos de segurança</strong><select id="ckSafety" onchange="toggleChecklistNote('Safety')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckSafetyNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Comunicação</strong><select id="ckRadio" onchange="toggleChecklistNote('Radio')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckRadioNote" class="hidden" placeholder="Descreva a alteração"></div><div class="checkStatusRow"><strong>Limpeza / organização</strong><select id="ckClean" onchange="toggleChecklistNote('Clean')"><option value="ok">✅ OK</option><option value="alteration">⚠️ Alteração</option><option value="na">➖ N/A</option></select><input id="ckCleanNote" class="hidden" placeholder="Descreva a alteração"></div></div>
+  <div class="grid" style="margin-top:10px"><label>Condição operacional<select id="checklistCondition"><option value="fit">🟢 Apta / Disponível</option><option value="caution">🟡 Apta com ressalva / Requer atenção</option><option value="unfit">🔴 Inapta / Indisponível</option></select></label><label class="checkItem"><input id="checklistCreateDamage" type="checkbox"> Criar avaria para alterações</label></div>
   <label style="margin-top:9px">Observações<textarea id="checklistNotes" rows="3"></textarea></label>
  </div>
  <div class="dactions"><button type="button" class="secondary" onclick="closeDialog('checklistDialog')">Cancelar</button><button class="primary">Salvar checklist</button></div>
@@ -312,9 +307,10 @@ async function audit(action,entityType,entityId,details={}){
  const {error}=await supabase.from('audit_events').insert(payload);if(error)console.warn("Audit",error)
 }
 function vesselBy(id){return V.find(v=>v.id===id)}
+function vesselLabel(v){return v?`${v.type||"Embarcação"}${v.prefix?" — "+v.prefix:""}`:"Embarcação"}
 function activeVessels(){return V.filter(v=>!v.archived)}
 function archivedVessels(){return V.filter(v=>v.archived)}
-function vesselOptions(selected=""){return '<option value="">Selecione</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===selected?"selected":""}>${esc(v.name)}</option>`).join("")}
+function vesselOptions(selected=""){return '<option value="">Selecione</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===selected?"selected":""}>${esc(vesselLabel(v))}</option>`).join("")}
 
 function periodStart(){
  let now=new Date();
@@ -333,15 +329,15 @@ function renderDashboard(){
   ["Utilizações",uses],["Combustível",liters.toLocaleString("pt-BR",{maximumFractionDigits:1})+" L"],["Gasto combustível","R$ "+fuelValue.toLocaleString("pt-BR",{minimumFractionDigits:2})],["Avarias registradas",damages.length],["Manutenções",maintenance],["Checklists",checks.length]
  ].map(([a,b])=>`<div class="kpi"><span>${a}</span><strong>${b}</strong></div>`).join("");
 
- $("todayVessels").innerHTML=active.length?active.map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
- $("todayReservations").innerHTML=todayRes.length?todayRes.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="reservation"><strong>${esc(v?.name||"Embarcação")} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}${r.responsible?" • "+esc(r.responsible):""}</div></div>`}).join(""):'<div class="empty">Nenhuma reserva para hoje.</div>';
- $("dashboardDamages").innerHTML=pending.length?pending.slice(0,8).map(d=>{let v=vesselBy(d.vessel_id);return`<div class="row"><div><strong>${esc(v?.name||"Embarcação")}</strong><div class="muted">${esc(d.description)} • ${new Date(d.reported_at).toLocaleDateString("pt-BR")}</div></div><span class="chip">${esc(d.severity)}</span></div>`}).join(""):'<div class="empty">Nenhuma avaria pendente.</div>';
+ $("todayVessels").innerHTML=active.length?active.map(v=>`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} ${v.base?"• "+esc(v.base):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></div>`).join(""):'<div class="empty">Nenhuma embarcação cadastrada.</div>';
+ $("todayReservations").innerHTML=todayRes.length?todayRes.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="reservation"><strong>${esc(vesselLabel(v))} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}${r.responsible?" • "+esc(r.responsible):""}</div></div>`}).join(""):'<div class="empty">Nenhuma reserva para hoje.</div>';
+ $("dashboardDamages").innerHTML=pending.length?pending.slice(0,8).map(d=>{let v=vesselBy(d.vessel_id);return`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(d.description)} • ${new Date(d.reported_at).toLocaleDateString("pt-BR")}</div></div><span class="chip">${esc(d.severity)}</span></div>`}).join(""):'<div class="empty">Nenhuma avaria pendente.</div>';
 }
 function renderVessels(){
  let active=activeVessels();
  $("vesselList").innerHTML=active.length?active.map(v=>{
   let logs=L.filter(l=>l.vessel_id===v.id),checks=C.filter(c=>c.vessel_id===v.id),damages=D.filter(d=>d.vessel_id===v.id),pending=damages.filter(d=>d.status==="open"),lastUse=logs.find(l=>l.type==="usage"),lastFuel=logs.find(l=>l.type==="fuel"),lastMaintenance=logs.find(l=>l.type==="maintenance");
-  return `<details class="vessel"><summary><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} ${v.prefix?"• "+esc(v.prefix):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></summary><div class="vesselBody"><div class="vesselProfile">
+  return `<details class="vessel"><summary><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} ${v.prefix?"• "+esc(v.prefix):""}</div></div><span class="badge ${v.status}">${statusLabel(v.status)}</span></summary><div class="vesselBody"><div class="vesselProfile">
    <div class="profileStats"><div class="profileStat"><span>Combustível</span><strong>${Number(v.fuel||0).toLocaleString("pt-BR")} L</strong></div><div class="profileStat"><span>Horímetro</span><strong>${Number(v.hours||0).toLocaleString("pt-BR")} h</strong></div><div class="profileStat"><span>Avarias pendentes</span><strong>${pending.length}</strong></div><div class="profileStat"><span>Próxima revisão</span><strong>${v.next_maintenance?new Date(v.next_maintenance+"T12:00").toLocaleDateString("pt-BR"):"—"}</strong></div></div>
    <div class="grid"><div><span class="muted">Último uso</span><strong>${lastUse?new Date(lastUse.occurred_at).toLocaleString("pt-BR"):"—"}</strong></div><div><span class="muted">Último abastecimento</span><strong>${lastFuel?new Date(lastFuel.occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div><div><span class="muted">Última manutenção</span><strong>${lastMaintenance?new Date(lastMaintenance.occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div><div><span class="muted">Último checklist</span><strong>${checks[0]?new Date(checks[0].occurred_at).toLocaleDateString("pt-BR"):"—"}</strong></div></div>
    ${v.notes?`<p class="muted">${esc(v.notes)}</p>`:""}
@@ -350,24 +346,24 @@ function renderVessels(){
  }).join(""):'<div class="card empty">Nenhuma embarcação cadastrada.</div>'
 }
 function renderCalendar(){
- $("calendarVessel").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join("");
+ $("calendarVessel").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}">${esc(vesselLabel(v))}</option>`).join("");
  let date=$("calendarDate").value||localKey(new Date()),vid=$("calendarVessel").value,rows=R.filter(r=>(!vid||r.vessel_id===vid)&&(localKey(r.start_at)===date||localKey(r.end_at)===date)).sort((a,b)=>a.start_at.localeCompare(b.start_at));
- $("calendarList").innerHTML=rows.length?rows.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="card"><div class="row"><div><strong>${esc(v?.name||"Embarcação")} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}</div></div><span class="badge ${r.status==="cancelled"?"unavailable":r.status==="completed"?"available":"inuse"}">${esc(r.status)}</span></div>${r.responsible?`<p>Responsável: ${esc(r.responsible)}</p>`:""}${r.notes?`<p class="muted">${esc(r.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma reserva nesta data.</div>'
+ $("calendarList").innerHTML=rows.length?rows.map(r=>{let v=vesselBy(r.vessel_id);return`<div class="card"><div class="row"><div><strong>${esc(vesselLabel(v))} • ${esc(r.purpose||"Reserva")}</strong><div class="muted">${new Date(r.start_at).toLocaleString("pt-BR")} → ${new Date(r.end_at).toLocaleString("pt-BR")}</div></div><span class="badge ${r.status==="cancelled"?"unavailable":r.status==="completed"?"available":"inuse"}">${esc(r.status)}</span></div>${r.responsible?`<p>Responsável: ${esc(r.responsible)}</p>`:""}${r.notes?`<p class="muted">${esc(r.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma reserva nesta data.</div>'
 }
 function renderLogs(){
- let current=$("logVesselFilter").value;$("logVesselFilter").innerHTML='<option value="">Todas</option>'+V.map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let current=$("logVesselFilter").value;$("logVesselFilter").innerHTML='<option value="">Todas</option>'+V.map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
  let type=$("logFilter").value,vid=$("logVesselFilter").value,rows=L.filter(l=>(!type||l.type===type)&&(!vid||l.vessel_id===vid));
- $("logList").innerHTML=rows.length?rows.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="card"><strong>${esc(typeLabel(l.type))}</strong><div class="muted">${new Date(l.occurred_at).toLocaleString("pt-BR")} • ${esc(v?.name||"Embarcação")}</div>${l.responsible?`<p><strong>Responsável:</strong> ${esc(l.responsible)}</p>`:""}${l.type==="fuel"?`<p><strong>Combustível:</strong> ${Number(l.fuel_liters||0).toLocaleString("pt-BR")} L${l.fuel_value?` • R$ ${Number(l.fuel_value).toLocaleString("pt-BR",{minimumFractionDigits:2})}`:""}</p>`:""}${l.notes?`<p class="muted">${esc(l.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum registro encontrado.</div>'
+ $("logList").innerHTML=rows.length?rows.map(l=>{let v=vesselBy(l.vessel_id);return`<div class="card"><strong>${esc(typeLabel(l.type))}</strong><div class="muted">${new Date(l.occurred_at).toLocaleString("pt-BR")} • ${esc(vesselLabel(v))}</div>${l.responsible?`<p><strong>Responsável:</strong> ${esc(l.responsible)}</p>`:""}${l.type==="fuel"?`<p><strong>Combustível:</strong> ${Number(l.fuel_liters||0).toLocaleString("pt-BR")} L${l.fuel_value?` • R$ ${Number(l.fuel_value).toLocaleString("pt-BR",{minimumFractionDigits:2})}`:""}</p>`:""}${l.notes?`<p class="muted">${esc(l.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum registro encontrado.</div>'
 }
 function renderChecklists(){
- let current=$("checklistVesselFilter").value;$("checklistVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let current=$("checklistVesselFilter").value;$("checklistVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
  let vid=$("checklistVesselFilter").value,type=$("checklistTypeFilter").value,rows=C.filter(c=>(!vid||c.vessel_id===vid)&&(!type||c.type===type));
- $("checklistList").innerHTML=rows.length?rows.map(c=>{let v=vesselBy(c.vessel_id),ok=Object.values(c.items||{}).filter(Boolean).length,total=Object.keys(c.items||{}).length;return`<div class="card"><div class="row"><div><strong>${c.type==="pre"?"Pré-uso":"Pós-uso"} • ${esc(v?.name||"Embarcação")}</strong><div class="muted">${new Date(c.occurred_at).toLocaleString("pt-BR")}${c.responsible?" • "+esc(c.responsible):""}</div></div><span class="chip">${ok}/${total}</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum checklist encontrado.</div>'
+ $("checklistList").innerHTML=rows.length?rows.map(c=>{let v=vesselBy(c.vessel_id),vals=Object.values(c.items||{}),ok=vals.filter(x=>(typeof x==="object"?x.status:x)==="ok").length,alt=vals.filter(x=>(typeof x==="object"?x.status:x)==="alteration").length,total=vals.length,cond={fit:"🟢 Apta",caution:"🟡 Ressalva",unfit:"🔴 Inapta"}[c.condition]||"";return`<div class="card"><div class="row"><div><strong>${c.type==="pre"?"Pré-uso":"Pós-uso"} • ${esc(vesselLabel(v))}</strong><div class="muted">${new Date(c.occurred_at).toLocaleString("pt-BR")}${c.responsible?" • "+esc(c.responsible):""}</div></div><span class="chip">${cond||`${ok} OK / ${alt} alt.`}</span></div>${c.notes?`<p class="muted">${esc(c.notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhum checklist encontrado.</div>'
 }
 function renderDamages(){
- let current=$("damageVesselFilter").value;$("damageVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(v.name)}</option>`).join("");
+ let current=$("damageVesselFilter").value;$("damageVesselFilter").innerHTML='<option value="">Todas</option>'+activeVessels().map(v=>`<option value="${v.id}" ${v.id===current?"selected":""}>${esc(vesselLabel(v))}</option>`).join("");
  let vid=$("damageVesselFilter").value,status=$("damageFilter").value,rows=D.filter(d=>(!vid||d.vessel_id===vid)&&(!status||d.status===status));
- $("damageList").innerHTML=rows.length?rows.map(d=>{let v=vesselBy(d.vessel_id);return`<div class="card ${d.status==="open"?"pendingDamage":"resolvedDamage"}"><div class="row"><div><strong>${esc(v?.name||"Embarcação")} • ${esc(d.severity)}</strong><div class="muted">${new Date(d.reported_at).toLocaleString("pt-BR")}${d.responsible?" • "+esc(d.responsible):""}</div></div>${d.status==="open"?`<button class="success" onclick="resolveDamage('${d.id}')">Resolver</button>`:`<span class="chip">Resolvida</span>`}</div><p>${esc(d.description)}</p>${d.resolution_notes?`<p class="muted"><strong>Resolução:</strong> ${esc(d.resolution_notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma avaria encontrada.</div>'
+ $("damageList").innerHTML=rows.length?rows.map(d=>{let v=vesselBy(d.vessel_id);return`<div class="card ${d.status==="open"?"pendingDamage":"resolvedDamage"}"><div class="row"><div><strong>${esc(vesselLabel(v))} • ${esc(d.severity)}</strong><div class="muted">${new Date(d.reported_at).toLocaleString("pt-BR")}${d.responsible?" • "+esc(d.responsible):""}</div></div>${d.status==="open"?`<button class="success" onclick="resolveDamage('${d.id}')">Resolver</button>`:`<span class="chip">Resolvida</span>`}</div><p>${esc(d.description)}</p>${d.resolution_notes?`<p class="muted"><strong>Resolução:</strong> ${esc(d.resolution_notes)}</p>`:""}</div>`}).join(""):'<div class="card empty">Nenhuma avaria encontrada.</div>'
 }
 function reportRows(){
  let from=$("reportFrom").value?new Date($("reportFrom").value+"T00:00:00"):new Date(Date.now()-30*86400000),to=$("reportTo").value?new Date($("reportTo").value+"T23:59:59"):new Date();
@@ -375,7 +371,7 @@ function reportRows(){
   let logs=L.filter(l=>l.vessel_id===v.id&&new Date(l.occurred_at)>=from&&new Date(l.occurred_at)<=to),damages=D.filter(d=>d.vessel_id===v.id&&new Date(d.reported_at)>=from&&new Date(d.reported_at)<=to);
   let uses=logs.filter(l=>l.type==="usage").length,liters=logs.filter(l=>l.type==="fuel").reduce((s,l)=>s+Number(l.fuel_liters||0),0),maintenance=logs.filter(l=>l.type==="maintenance").length;
   let hours=logs.reduce((mx,l)=>Math.max(mx,Number(l.hours||0)),0);
-  return {name:v.name,uses,liters,hours,damages:damages.length,maintenance}
+  return {name:vesselLabel(v),uses,liters,hours,damages:damages.length,maintenance}
  })
 }
 function renderReports(){
@@ -386,11 +382,12 @@ function renderReports(){
 function renderMore(){
  $("userInfo").textContent=(profile?.display_name||user?.email||"Usuário")+" • "+(profile?.role||"operator");
  let archived=archivedVessels();
- $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(v.name)}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
+ $("archivedVessels").innerHTML=archived.length?archived.map(v=>`<div class="row"><div><strong>${esc(vesselLabel(v))}</strong><div class="muted">${esc(v.type||"")} • arquivada</div></div><button class="secondary" onclick="restoreVessel('${v.id}')">Restaurar</button></div>`).join(""):'<div class="empty">Nenhuma embarcação arquivada.</div>';
  $("auditList").innerHTML=A.length?A.slice(0,30).map(a=>`<div class="auditLine"><strong>${esc(a.action)}</strong> • ${new Date(a.created_at).toLocaleString("pt-BR")}<div class="muted">${esc(a.entity_type||"")}</div></div>`).join(""):'<div class="empty">Sem alterações registradas.</div>'
 }
 function render(){renderDashboard();renderVessels();renderCalendar();renderLogs();renderChecklists();renderDamages();renderReports();renderMore()}
 
+window.toggleChecklistNote=key=>{let s=$("ck"+key),n=$("ck"+key+"Note");n.classList.toggle("hidden",s.value!=="alteration");if(s.value!=="alteration")n.value=""};
 window.openChecklist=(vid="")=>{
  let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
  $("checklistForm").reset();$("checklistVessel").innerHTML=vesselOptions(vid||active[0].id);$("checklistVessel").value=vid||active[0].id;$("checklistDate").value=localInputNow();$("checklistDialog").showModal()
@@ -398,8 +395,21 @@ window.openChecklist=(vid="")=>{
 $("newChecklist").onclick=()=>openChecklist();
 $("checklistForm").onsubmit=async e=>{
  e.preventDefault();
- let payload={vessel_id:$("checklistVessel").value,type:$("checklistType").value,occurred_at:new Date($("checklistDate").value).toISOString(),responsible:$("checklistResponsible").value.trim(),items:{hull:$("ckHull").checked,engine:$("ckEngine").checked,fuel:$("ckFuel").checked,safety:$("ckSafety").checked,radio:$("ckRadio").checked,clean:$("ckClean").checked},notes:$("checklistNotes").value.trim(),created_by:user.id};
- let {data,error}=await supabase.from('checklists').insert(payload).select().single();if(error)return alert(error.message);await audit("Checklist criado","checklist",data.id,{type:payload.type});$("checklistDialog").close();await loadAll()
+ let keys=["Hull","Engine","Fuel","Safety","Radio","Clean"],items={};
+ for(let key of keys){items[key.toLowerCase()]={status:$("ck"+key).value,note:$("ck"+key+"Note").value.trim()}}
+ let condition=$("checklistCondition").value;
+ let payload={vessel_id:$("checklistVessel").value,type:$("checklistType").value,occurred_at:new Date($("checklistDate").value).toISOString(),responsible:$("checklistResponsible").value.trim(),items,condition,notes:$("checklistNotes").value.trim(),created_by:user.id};
+ let {data,error}=await supabase.from('checklists').insert(payload).select().single();if(error)return alert(error.message);
+ if($("checklistCreateDamage").checked){
+  let altered=Object.entries(items).filter(([k,x])=>x.status==="alteration");
+  for(let [k,x] of altered){
+   let label={hull:"Casco / estrutura",engine:"Motor / propulsão",fuel:"Combustível",safety:"Equipamentos de segurança",radio:"Comunicação",clean:"Limpeza / organização"}[k]||k;
+   let desc=label+(x.note?": "+x.note:" — alteração identificada no checklist");
+   await supabase.from('damages').insert({vessel_id:payload.vessel_id,reported_at:payload.occurred_at,severity:condition==="unfit"?"high":"medium",responsible:payload.responsible,description:desc,status:"open",created_by:user.id})
+  }
+ }
+ if(condition==="unfit"){await supabase.from('vessels').update({status:"unavailable",updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',payload.vessel_id)}
+ await audit("Checklist criado","checklist",data.id,{type:payload.type,condition});$("checklistDialog").close();await loadAll()
 };
 window.openDamage=(vid="")=>{
  let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");
@@ -414,7 +424,7 @@ window.resolveDamage=async id=>{
  let d=D.find(x=>x.id===id);if(!d)return;let notes=prompt("Descreva o que foi feito para resolver a avaria:");if(notes===null)return;
  let {error}=await supabase.from('damages').update({status:"resolved",resolved_at:new Date().toISOString(),resolution_notes:notes,resolved_by:user.id}).eq('id',id);if(error)return alert(error.message);await audit("Avaria resolvida","damage",id,{resolution:notes});await loadAll()
 };
-function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"";$("vesselDialogTitle").textContent=v?"Editar embarcação":"Nova embarcação";$("vesselName").value=v?.name||"";$("vesselType").value=v?.type||"Lancha";$("vesselPrefix").value=v?.prefix||"";$("vesselStatus").value=v?.status||"available";$("vesselFuel").value=v?.fuel??"";$("vesselHours").value=v?.hours??"";$("vesselNextMaintenance").value=v?.next_maintenance||"";$("vesselBase").value=v?.base||"";$("vesselNotes").value=v?.notes||"";$("vesselDialog").showModal()}
+function openVessel(v=null){$("vesselForm").reset();$("vesselId").value=v?.id||"";$("vesselDialogTitle").textContent=v?"Editar embarcação":"Nova embarcação";$("vesselType").value=v?.type||"Lancha";$("vesselPrefix").value=v?.prefix||"";$("vesselStatus").value=v?.status||"available";$("vesselFuel").value=v?.fuel??"";$("vesselHours").value=v?.hours??"";$("vesselNextMaintenance").value=v?.next_maintenance||"";$("vesselBase").value=v?.base||"";$("vesselNotes").value=v?.notes||"";$("vesselDialog").showModal()}
 window.editVessel=id=>openVessel(vesselBy(id));
 window.removeOrArchiveVessel=async id=>{
  let vessel=vesselBy(id);if(!vessel)return;
@@ -423,12 +433,12 @@ window.removeOrArchiveVessel=async id=>{
   if(!confirm("Esta embarcação não possui histórico. Excluir definitivamente "+vessel.name+"?"))return;
   let {error}=await supabase.from('vessels').delete().eq('id',id);
   if(error)return alert("Não foi possível excluir: "+error.message);
-  await audit("Embarcação excluída definitivamente","vessel",id,{name:vessel.name});
+  await audit("Embarcação excluída definitivamente","vessel",id,{name:vesselLabel(vessel)});
  }else{
-  if(!confirm(vessel.name+" possui histórico. Ela será arquivada para preservar os registros. Continuar?"))return;
+  if(!confirm(vesselLabel(vessel)+" possui histórico. Ela será arquivada para preservar os registros. Continuar?"))return;
   let {error}=await supabase.from('vessels').update({archived:true,archived_at:new Date().toISOString(),updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
   if(error)return alert("Não foi possível arquivar: "+error.message);
-  await audit("Embarcação arquivada","vessel",id,{name:vessel.name});
+  await audit("Embarcação arquivada","vessel",id,{name:vesselLabel(vessel)});
  }
  await loadAll()
 };
@@ -436,11 +446,21 @@ window.restoreVessel=async id=>{
  let vessel=vesselBy(id);if(!vessel)return;
  let {error}=await supabase.from('vessels').update({archived:false,archived_at:null,updated_by:user.id,updated_at:new Date().toISOString()}).eq('id',id);
  if(error)return alert("Não foi possível restaurar: "+error.message);
- await audit("Embarcação restaurada","vessel",id,{name:vessel.name});
+ await audit("Embarcação restaurada","vessel",id,{name:vesselLabel(vessel)});
  await loadAll()
 };
 $("newVessel").onclick=()=>openVessel();
-$("vesselForm").onsubmit=async e=>{e.preventDefault();let id=$("vesselId").value,payload={name:$("vesselName").value.trim(),type:$("vesselType").value,prefix:$("vesselPrefix").value.trim(),status:$("vesselStatus").value,fuel:n($("vesselFuel").value),hours:n($("vesselHours").value),next_maintenance:$("vesselNextMaintenance").value||null,base:$("vesselBase").value.trim(),notes:$("vesselNotes").value.trim(),updated_by:user.id,updated_at:new Date().toISOString()};let result=id?await supabase.from('vessels').update(payload).eq('id',id).select().single():await supabase.from('vessels').insert({...payload,created_by:user.id}).select().single();if(result.error)return alert(result.error.message);await audit(id?"Embarcação editada":"Embarcação cadastrada","vessel",result.data.id,{name:payload.name});$("vesselDialog").close();await loadAll()}
+$("vesselForm").onsubmit=async e=>{
+ e.preventDefault();
+ let prefix=$("vesselPrefix").value.trim(),id=$("vesselId").value,type=$("vesselType").value;
+ if(!prefix)return alert("Informe o prefixo da embarcação.");
+ if(V.some(v=>v.prefix?.toLowerCase()===prefix.toLowerCase()&&v.id!==id))return alert("Já existe uma embarcação cadastrada com este prefixo.");
+ let payload={name:type+" — "+prefix,type,prefix,status:$("vesselStatus").value,fuel:n($("vesselFuel").value),hours:n($("vesselHours").value),next_maintenance:$("vesselNextMaintenance").value||null,base:$("vesselBase").value.trim(),notes:$("vesselNotes").value.trim(),updated_by:user.id,updated_at:new Date().toISOString()};
+ let result=id?await supabase.from('vessels').update(payload).eq('id',id).select().single():await supabase.from('vessels').insert({...payload,created_by:user.id}).select().single();
+ if(result.error)return alert(result.error.message);
+ await audit(id?"Embarcação editada":"Embarcação cadastrada","vessel",result.data.id,{prefix,type});
+ $("vesselDialog").close();await loadAll()
+}
 
 function setLogFields(){let fuel=$("logType").value==="fuel";$("fuelLitersWrap").style.display=fuel?"block":"none";$("fuelValueWrap").style.display=fuel?"block":"none"}
 window.openLog=(vid="",type="usage")=>{let active=activeVessels();if(!active.length)return alert("Cadastre uma embarcação primeiro.");$("logForm").reset();$("logVessel").innerHTML=vesselOptions(vid||active[0].id);$("logVessel").value=vid||active[0].id;$("logType").value=type;$("logDate").value=localInputNow();setLogFields();$("logDialog").showModal()}
